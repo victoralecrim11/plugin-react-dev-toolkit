@@ -1,0 +1,18 @@
+{
+  "name": "plugin-react-dev",
+  "version": "1.0.0",
+  "description": "Mentoria e construção de projetos React, Next.js e React Native/Expo com dashboard local de projetos.",
+  "author": { "name": "Victor Alecrim" },
+  "keywords": ["react", "nextjs", "react-native", "expo", "typescript", "mentoria"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "React Dev Hub",
+    "shortDescription": "Construa, revise e acompanhe projetos React.",
+    "longDescription": "Plugin didático para projetos React, Next.js e Expo, com padrões modernos e dashboard local persistente.",
+    "developerName": "Victor Alecrim",
+    "category": "Developer Tools",
+    "capabilities": ["Write", "Interactive"],
+    "defaultPrompt": ["Crie um MVP React com TypeScript.", "Revise meu componente React.", "Abra o dashboard dos meus projetos."],
+    "brandColor": "#2563EB"
+  }
+}

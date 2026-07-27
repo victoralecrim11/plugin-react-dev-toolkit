@@ -1,0 +1,10 @@
+{
+  "name": "plugin-react-dev-marketplace",
+  "interface": { "displayName": "React Dev Hub" },
+  "plugins": [{
+    "name": "plugin-react-dev",
+    "source": { "source": "local", "path": "./plugins/plugin-react-dev" },
+    "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+    "category": "Developer Tools"
+  }]
+}

@@ -73,14 +73,12 @@ Para fazer backup, basta copiar esse arquivo. Para reiniciar o Project Hub, fech
 
 ```text
 plugin-react-dev/
-<<<<<<< HEAD
 ├── .codex-plugin/                 # Manifesto do Codex
 ├── .claude-plugin/                # Manifesto/marketplace compatível
 =======
 ├── .agents/plugins/              # Marketplace padrão do Codex
 ├── .codex-plugin/                 # Manifesto do Codex
 ├── .claude-plugin/                # Metadados legados de compatibilidade
->>>>>>> f6e63fd (fix: plugin-react-dev v1.0)
 ├── commands/                      # Comandos de fluxo de trabalho
 ├── skills/
 │   ├── react-core/                # Padrões compartilhados
@@ -101,12 +99,10 @@ Em cada review, a análise considera: tipagem, tratamento de erro, estados de ca
 ## Manual
 
 Abra `manual.html` no navegador para uma visão rápida dos comandos e do fluxo recomendado. O manual e este README acompanham a versão do plugin e podem ser mantidos junto à sua pasta de projetos.
-<<<<<<< HEAD
-=======
 
 ## Instalação no Codex
 
 Este repositório é também o diretório do plugin. O marketplace padrão fica em `.agents/plugins/marketplace.json` e aponta para `./`, isto é, para a raiz do repositório onde estão `.codex-plugin/plugin.json` e `skills/`.
 
 Para testar uma cópia local, adicione a raiz do repositório como marketplace local e reinicie o aplicativo. Para distribuir via GitHub, use este repositório como marketplace e mantenha o arquivo `.agents/plugins/marketplace.json` no branch publicado. Em repositórios privados, o Git usado pelo Codex precisa ter credenciais de leitura para a sua conta; a estrutura do plugin, porém, é a mesma.
->>>>>>> f6e63fd (fix: plugin-react-dev v1.0)
+

@@ -7,7 +7,7 @@ from urllib.parse import urlsplit, parse_qs
 import json, os, re, sys, webbrowser
 import urllib.request, urllib.error
 
-APP_VERSION = "2026-07-27-v5"
+APP_VERSION = "2026-07-28-v7"
 
 ROOT = Path(__file__).resolve().parent
 DATA_FILE = ROOT / "projetos-data.json"
@@ -15,7 +15,18 @@ CONFIG_FILE = ROOT / "dashboard-config.json"
 HTML_FILE = ROOT / "dashboard-template.html"
 
 DEFAULT = {"projects": [], "components": [], "reviews": [], "checklists": {}}
-DEFAULT_CONFIG = {"scanRoot": str(Path.home() / "Downloads"), "githubUsername": "", "githubToken": ""}
+DEFAULT_CONFIG = {
+    "scanRoot": str(Path.home() / "Downloads"),
+    "githubUsername": "",
+    "githubToken": "",
+    # Perfil do desenvolvedor. Escrito somente pelo comando /setup; os demais
+    # comandos apenas leem. Vazio significa que /setup ainda nao rodou.
+    "devLevel": "",          # Beginner | Junior | Mid-Level | Senior
+    "projectsRoot": "",      # pasta-base dos projetos
+    "defaultPlatform": "",   # react | next | expo
+    "defaultGoal": "",       # academico | mvp | producao
+    "setupCompletedAt": "",  # ISO-8601
+}
 SKIP_DIRS = {"node_modules", ".git", "dist", "build", ".next", ".expo", "coverage", ".turbo", ".cache"}
 REACT_DEP_MARKERS = ("react", "react-native", "next", "expo")
 
@@ -24,6 +35,12 @@ def load_data():
     try:
         data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
         for key, value in DEFAULT.items(): data.setdefault(key, json.loads(json.dumps(value)))
+        # Registros gravados antes da normalizacao podem ter as chaves em
+        # portugues (nome, caminho, nivel...) e por isso apareciam com os campos
+        # em branco no painel. Normalizar na leitura recupera esses valores sem
+        # exigir que o usuario reescreva nada.
+        for collection in CANONICAL:
+            data[collection] = [normalize_item(collection, item)[0] for item in data.get(collection, [])]
         return data
     except (OSError, json.JSONDecodeError): return json.loads(json.dumps(DEFAULT))
 
@@ -46,6 +63,163 @@ def stamp(item):
     if not item.get("id"):
         item["id"] = str(int(datetime.now(timezone.utc).timestamp() * 1000000))
     return item
+
+# ---------------------------------------------------------------------------
+# Normalizacao de payload
+#
+# O POST antes gravava o payload cru. Quem registrava um projeto via API tinha
+# que acertar o nome exato de cada chave; qualquer variacao (em portugues, em
+# snake_case) era gravada como campo extra e o campo real ficava vazio -- o que
+# fazia o card aparecer sem nome e sem caminho local. Agora toda chave passa
+# por um mapa de sinonimos e o item sai com o conjunto canonico completo.
+# ---------------------------------------------------------------------------
+
+CANONICAL = {
+    "projects": ["name", "path", "platform", "status", "reactVersion", "stack", "level", "notes", "repoUrl"],
+    "components": ["name", "project", "category", "path", "description"],
+    "reviews": ["project", "maintainability", "summary", "debts"],
+}
+
+# Campos sem os quais o painel perde funcionalidade (detectar componentes, etc.).
+REQUIRED = {"projects": ["name", "path"], "components": ["name", "project"], "reviews": ["project"]}
+
+ALIASES = {
+    "projects": {
+        "nome": "name", "projectname": "name", "projeto": "name", "title": "name",
+        "caminho": "path", "caminholocal": "path", "localpath": "path", "projectpath": "path",
+        "folder": "path", "pasta": "path", "dir": "path", "directory": "path", "root": "path",
+        "plataforma": "platform", "stackplatform": "platform", "framework": "platform",
+        "situacao": "status", "estado": "status",
+        "versaoreact": "reactVersion", "reactversion": "reactVersion", "versao": "reactVersion",
+        "react": "reactVersion",
+        "tecnologias": "stack", "techstack": "stack", "technologies": "stack",
+        "nivel": "level", "senioridade": "level", "devlevel": "level", "seniority": "level",
+        "notas": "notes", "observacoes": "notes", "obs": "notes",
+        "repo": "repoUrl", "repositorio": "repoUrl", "github": "repoUrl", "repourl": "repoUrl",
+    },
+    "components": {
+        "nome": "name", "componente": "name",
+        "projectname": "project", "projeto": "project",
+        "categoria": "category", "tipo": "category",
+        "caminho": "path", "filepath": "path", "arquivo": "path",
+        "descricao": "description", "desc": "description", "reuso": "description",
+    },
+    "reviews": {
+        "projeto": "project", "projectname": "project",
+        "manutenibilidade": "maintainability", "score": "maintainability", "nota": "maintainability",
+        "resumo": "summary", "sumario": "summary",
+        "debitos": "debts", "dividas": "debts", "technicaldebt": "debts", "debitostecnicos": "debts",
+    },
+}
+
+LEVELS = {"beginner": "Beginner", "junior": "Junior", "midlevel": "Mid-Level",
+          "mid": "Mid-Level", "pleno": "Mid-Level", "senior": "Senior"}
+
+def _slug(key):
+    return re.sub(r"[^a-z0-9]", "", str(key).lower())
+
+def normalize_item(collection, payload):
+    """Mapeia sinonimos para as chaves canonicas e completa o conjunto de campos.
+
+    Retorna (item, warnings). Campos preservados: id, updatedAt e quaisquer
+    chaves desconhecidas, para nunca descartar dado que o usuario enviou.
+    """
+    canonical = CANONICAL.get(collection, [])
+    if not canonical:
+        return payload, []
+    by_slug = {_slug(k): k for k in canonical}
+    aliases = ALIASES.get(collection, {})
+
+    item, extras = {}, {}
+    for raw_key, value in payload.items():
+        if raw_key in ("id", "updatedAt"):
+            item[raw_key] = value
+            continue
+        slug = _slug(raw_key)
+        target = by_slug.get(slug) or aliases.get(slug)
+        if target:
+            # Nao deixa um alias vazio sobrescrever um valor ja preenchido.
+            if target not in item or (item.get(target) in ("", None) and value not in ("", None)):
+                item[target] = value
+        else:
+            extras[raw_key] = value
+
+    for key in canonical:
+        item.setdefault(key, [] if key == "debts" else "")
+
+    # debts aceita string separada por virgula ou lista.
+    if collection == "reviews" and isinstance(item.get("debts"), str):
+        item["debts"] = [d.strip() for d in item["debts"].split(",") if d.strip()]
+
+    if collection == "projects":
+        lvl = _slug(item.get("level", ""))
+        if lvl in LEVELS:
+            item["level"] = LEVELS[lvl]
+        if isinstance(item.get("path"), str):
+            item["path"] = item["path"].strip().strip('"').strip("'")
+
+    item.update(extras)
+    return item, field_warnings(collection, item)
+
+def field_warnings(collection, item):
+    """Avisos sobre campos vazios. Deve ser calculado sobre o registro FINAL.
+
+    Calcular sobre o payload de entrada daria falso positivo em atualizacao
+    parcial: um POST so com 'notes' acusaria 'name' e 'path' vazios mesmo que
+    o registro salvo tenha os dois preenchidos.
+    """
+    canonical = CANONICAL.get(collection, [])
+    faltando = [k for k in REQUIRED.get(collection, []) if not str(item.get(k, "")).strip()]
+    vazios = [k for k in canonical if not str(item.get(k, "")).strip() and k not in faltando]
+    warnings = []
+    if faltando:
+        warnings.append("Campos obrigatorios vazios: " + ", ".join(faltando))
+    if vazios:
+        warnings.append("Campos opcionais vazios: " + ", ".join(vazios))
+    return warnings
+
+def resolve_project_path(item):
+    """Tenta descobrir o caminho local quando ele nao foi enviado.
+
+    Procura <projectsRoot>/<name> e <scanRoot>/<name>. So aceita se a pasta
+    existir de fato -- nunca inventa um caminho.
+    """
+    if str(item.get("path", "")).strip() or not str(item.get("name", "")).strip():
+        return False
+    cfg = load_config()
+    for base in (cfg.get("projectsRoot", ""), cfg.get("scanRoot", "")):
+        if not base:
+            continue
+        try:
+            candidate = Path(base).expanduser() / item["name"]
+        except (OSError, RuntimeError):
+            continue
+        if candidate.is_dir():
+            item["path"] = str(candidate)
+            return True
+    return False
+
+# Campos de projeto que podem ser herdados do perfil quando vierem vazios.
+# Espelha o pre-preenchimento que o formulario do painel faz via suggest():
+# um projeto registrado pela API passa a ficar tao completo quanto um
+# cadastrado na tela.
+PROFILE_DEFAULTS = {"status": "defaultGoal", "platform": "defaultPlatform", "level": "devLevel"}
+
+def apply_profile_defaults(item):
+    """Completa campos vazios com o perfil salvo. Retorna os campos herdados."""
+    cfg = load_config()
+    herdados = []
+    for field, cfg_key in PROFILE_DEFAULTS.items():
+        if str(item.get(field, "")).strip():
+            continue
+        value = str(cfg.get(cfg_key, "")).strip()
+        if not value:
+            continue
+        if field == "level":
+            value = LEVELS.get(_slug(value), value)
+        item[field] = value
+        herdados.append(field)
+    return herdados
 
 def scan_projects(root, max_depth=6):
     results = []
@@ -247,17 +421,55 @@ class Handler(SimpleHTTPRequestHandler):
         except json.JSONDecodeError: return self.send_json(400, {"error": "JSON invalido"})
 
         if self.path == "/api/config":
-            cfg = load_config(); cfg.update(payload); save_config(cfg)
+            cfg = load_config()
+            cfg.update(payload)
+            # projectsRoot e a fonte da verdade da pasta-base; scanRoot acompanha
+            # para o scan nao apontar para outro lugar sem o usuario perceber.
+            if str(payload.get("projectsRoot", "")).strip() and "scanRoot" not in payload:
+                cfg["scanRoot"] = cfg["projectsRoot"]
+            save_config(cfg)
             return self.send_json(200, cfg)
 
         data = load_data()
         collection = {"/api/projects": "projects", "/api/components": "components", "/api/reviews": "reviews"}.get(self.path)
         if collection:
-            item = stamp(payload); items = data[collection]
-            old = next((i for i, value in enumerate(items) if value.get("id") == item["id"]), None)
-            if old is None: items.append(item)
-            else: items[old] = item
-            save_data(data); return self.send_json(200, item)
+            # O formulario do painel manda _replace: campo apagado na tela deve
+            # ficar apagado. Chamadas de API (agentes) omitem a flag e recebem
+            # merge, para um payload parcial nao zerar campos ja preenchidos.
+            replace = bool(payload.pop("_replace", False))
+            item, warnings = normalize_item(collection, payload)
+            items = data[collection]
+            existe = any(str(v.get("id")) == str(item.get("id", "")) for v in items) if item.get("id") else False
+            if collection == "projects":
+                if resolve_project_path(item):
+                    warnings = [w for w in warnings if "path" not in w]
+                    warnings.append("Caminho local deduzido da pasta-base: " + item["path"])
+                # Herdar do perfil so ao CRIAR. Em atualizacao nao: com _replace o
+                # usuario esta apagando o campo de proposito, e reencher seria
+                # desfazer a acao dele.
+                if not existe and not replace:
+                    herdados = apply_profile_defaults(item)
+                    if herdados:
+                        warnings.append("Herdado do perfil: " + ", ".join(herdados))
+            item = stamp(item)
+            old = next((i for i, value in enumerate(items) if str(value.get("id")) == str(item["id"])), None)
+            if old is None:
+                items.append(item)
+            elif replace:
+                items[old] = item
+            else:
+                merged = dict(items[old])
+                for key, value in item.items():
+                    if value not in ("", None, []) or key not in merged:
+                        merged[key] = value
+                item = merged
+                items[old] = item
+            save_data(data)
+            # Recalcula sobre o registro final; ver field_warnings(). Os avisos
+            # informativos (deducao de caminho, heranca de perfil) sao mantidos.
+            final = field_warnings(collection, item)
+            final += [w for w in warnings if w.startswith(("Caminho local deduzido", "Herdado do perfil"))]
+            return self.send_json(200, dict(item, warnings=final))
         if self.path == "/api/checklists":
             project_id = str(payload.get("projectId", "")); data["checklists"][project_id] = payload.get("items", {})
             save_data(data); return self.send_json(200, data["checklists"][project_id])

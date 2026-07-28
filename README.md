@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.2.0
+# React Dev Hub Plugin — v1.2.1
 
 Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto.
 

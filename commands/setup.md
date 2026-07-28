@@ -16,7 +16,7 @@ Antes de perguntar qualquer coisa, procure um `dashboard-config.json` existente:
 **Modo reconfiguração** — o perfil já existe. Então:
 
 1. Mostre o perfil atual em uma lista curta (`devLevel`, `projectsRoot`, `defaultPlatform`, `defaultGoal`).
-2. Pergunte **o que o usuário quer alterar**. Não repita o onboarding inteiro e não reperunte campos que ele não mencionou.
+2. Pergunte **o que o usuário quer alterar**. Não repita o onboarding inteiro e não repergunte campos que ele não mencionou.
 3. Grave apenas os campos alterados via `POST /api/config` (ver Etapa 3).
 4. **Pule a Etapa 2 inteira.** Os arquivos já estão instalados. A única exceção é se o usuário mudou `projectsRoot`: nesse caso copie os arquivos para a nova pasta, mova `projetos-data.json` e `dashboard-config.json` junto, e reinicie o servidor lá.
 5. Confirme o que mudou e encerre. Não rode scan nem reapresente o manual sem que o usuário peça.

@@ -17,15 +17,17 @@
         <article class="p-5 bg-slate-900 rounded-xl">
           <h2 class="font-bold">1. Configure</h2>
           <p class="mt-2 text-slate-300">
-            Use <code>/setup</code> para informar plataforma, nível e objetivo.
-            O plugin sugere a arquitetura mais simples que atende ao MVP.
+            <code>/setup</code> registra seu nível e a pasta-base, sobe o
+            Project Hub e entrega este manual. É por máquina, não por projeto —
+            e pode rodar de novo quando quiser trocar o perfil.
           </p>
         </article>
         <article class="p-5 bg-slate-900 rounded-xl">
-          <h2 class="font-bold">2. Construa</h2>
+          <h2 class="font-bold">2. Construa — por projeto</h2>
           <p class="mt-2 text-slate-300">
-            Use <code>/criar-projeto</code> e <code>/criar-componente</code>.
-            Todo código é TypeScript e explica as decisões.
+            <code>/criar-projeto</code> lê o perfil salvo e pergunta só o que
+            é do projeto. Depois, <code>/criar-componente</code>. Todo código é
+            TypeScript e explica as decisões.
           </p>
         </article>
         <article class="p-5 bg-slate-900 rounded-xl">
@@ -38,13 +40,24 @@
         <article class="p-5 bg-slate-900 rounded-xl">
           <h2 class="font-bold">4. Acompanhe</h2>
           <p class="mt-2 text-slate-300">
-            Use <code>/dashboard</code> e abra o Project Hub local em
+            <code>/dashboard</code> reabre o Project Hub local em
             <code>127.0.0.1:8766</code>. Os dados ficam em JSON no seu
             computador.
           </p>
         </article>
       </section>
       <section class="mt-8 p-5 border border-blue-900 rounded-xl">
+        <h2 class="font-bold">Seu perfil fica salvo</h2>
+        <p class="mt-3 text-slate-300">
+          O nível de calibração é informado no <code>/setup</code> e persiste
+          em <code>dashboard-config.json</code>. Todos os comandos leem esse
+          valor para ajustar a profundidade das explicações e o teto de
+          complexidade arquitetural — nenhum deles repergunta. Para trocar de
+          nível, rode <code>/setup</code> outra vez: ele mostra o que está
+          salvo e altera só o que você pedir.
+        </p>
+      </section>
+      <section class="mt-4 p-5 border border-blue-900 rounded-xl">
         <h2 class="font-bold">Decisões padrão</h2>
         <ul class="list-disc pl-5 mt-3 text-slate-300">
           <li>React: TypeScript, Hooks, Context/Zustand e TanStack Query.</li>

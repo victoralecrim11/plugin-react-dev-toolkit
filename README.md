@@ -1,15 +1,38 @@
-# React Dev Hub Plugin — v1.0.0
+# React Dev Hub Plugin — v1.2.0
 
 Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto.
 
 ## O ciclo de desenvolvimento
 
-1. `/setup` — roda no início de um projeto para registrar plataforma, nível, objetivo e pasta de trabalho. A partir disso, o plugin define uma base técnica simples e adequada ao MVP.
-2. `/criar-projeto` — transforma uma ideia validada em scaffold TypeScript para React, Next.js ou Expo. Entrega estrutura inicial, arquivos fundamentais e próximos passos.
+O fluxo tem frequências distintas: `/setup` roda **uma vez por máquina**, `/criar-projeto` **uma vez por projeto**, e os demais são de uso recorrente durante o desenvolvimento.
+
+1. `/setup` — **configuração do ambiente.** Registra seu nível de calibração (Beginner/Junior/Mid-Level/Senior), a pasta-base dos projetos e as preferências padrão de stack. Em seguida entrega as ferramentas locais: sobe o **Project Hub** e disponibiliza o **manual interativo**. Não gera código. É idempotente — rodar de novo é a forma de alterar o perfil.
+2. `/criar-projeto` — **uma vez por projeto.** Lê o perfil salvo pelo `/setup` e pergunta apenas o que é específico do projeto: nome, plataforma, objetivo e escopo. Transforma a ideia em scaffold TypeScript com estrutura de pastas, arquivos fundamentais e próximos passos.
 3. `/criar-componente` — produz componentes e hooks reutilizáveis, pequenos, acessíveis e tipados. Itens com potencial de reuso podem ser adicionados ao catálogo do dashboard.
 4. `/arquitetura` — define ou ajusta a organização de pastas, estado e responsabilidades sem antecipar complexidade que o projeto ainda não precisa.
 5. `/review` — analisa código existente, preserva comportamento e registra manutenibilidade, riscos e débitos técnicos no Project Hub.
-6. `/dashboard` — abre o painel local para centralizar os projetos, componentes, reviews e checklists arquiteturais.
+6. `/dashboard` — reabre o painel local a qualquer momento para consultar projetos, componentes, reviews e checklists arquiteturais.
+
+### Perfil persistido
+
+O nível de calibração é informado no `/setup` e fica em `dashboard-config.json`. Todos os comandos **leem** esse valor para ajustar a profundidade das explicações e o teto de complexidade arquitetural — nenhum deles repergunta o seu nível a cada projeto novo, e nenhum deles escreve nele.
+
+| Campo | Função |
+| --- | --- |
+| `devLevel` | Beginner, Junior, Mid-Level ou Senior |
+| `projectsRoot` | Pasta-base onde os projetos ficam |
+| `defaultPlatform` | `react`, `next` ou `expo` (padrão, sobrescrevível por projeto) |
+| `defaultGoal` | `academico`, `mvp` ou `producao` |
+| `scanRoot` | Raiz usada pelo scan do painel; mantida igual a `projectsRoot` |
+| `setupCompletedAt` | Marca que o onboarding já rodou |
+
+### Alterando o perfil depois
+
+Rode `/setup` novamente. Ele detecta que o perfil já existe e entra em **modo reconfiguração**: mostra o que está salvo, pergunta só o que você quer mudar, grava via merge parcial e pula a instalação. Nada é reinstalado e nenhum outro campo é perdido.
+
+Trocar o `devLevel` afeta o teto de complexidade dos próximos comandos, mas não reescreve projetos já criados. Se você mudar `projectsRoot`, o `/setup` move o Project Hub e os dados para a nova pasta.
+
+Se o perfil não existir, os comandos avisam, assumem `Junior` como nível provisório e seguem o trabalho — nenhum deles refaz o onboarding por conta própria.
 
 ## Padrões técnicos
 
@@ -56,18 +79,25 @@ O painel em `http://127.0.0.1:8766` permite:
 
 ### Como iniciar
 
+O caminho recomendado é rodar `/setup`: ele copia os arquivos, sobe o servidor e abre o painel para você. Se preferir fazer à mão:
+
 1. Copie os arquivos de `skills/dashboard-projetos/references/` para a pasta onde deseja manter os dados do Project Hub.
 2. No Windows, dê duplo clique em `iniciar-dashboard.bat`.
 3. No macOS/Linux, execute `chmod +x iniciar-dashboard.command` uma vez e depois `./iniciar-dashboard.command`.
 4. O navegador abre automaticamente em `http://127.0.0.1:8766`.
 
+Depois disso, `/dashboard` reabre o painel a qualquer momento.
+
 O único requisito é Python 3 instalado. O servidor usa somente a biblioteca padrão; não é necessário instalar pacotes com `pip`.
 
 ### Onde ficam os dados
 
-O arquivo `projetos-data.json` é criado **quando o primeiro projeto, componente, review ou checklist é salvo**. Antes disso, a tela usa uma estrutura vazia em memória, por isso não há arquivo ao abrir o dashboard pela primeira vez. O JSON fica ao lado de `dashboard-server.py` e contém apenas os dados locais registrados no painel.
+Dois arquivos ficam ao lado de `dashboard-server.py`:
 
-Para fazer backup, basta copiar esse arquivo. Para reiniciar o Project Hub, feche o servidor e exclua apenas `projetos-data.json` — esta ação apaga permanentemente os registros do painel, mas não altera seus projetos de código.
+- **`projetos-data.json`** — projetos, componentes, reviews e checklists. Criado **quando o primeiro registro é salvo**; antes disso a tela usa uma estrutura vazia em memória, por isso não há arquivo ao abrir o dashboard pela primeira vez.
+- **`dashboard-config.json`** — seu perfil (`devLevel`, `projectsRoot`, plataforma e objetivo padrão) e as preferências de scan. Escrito pelo `/setup`.
+
+Para fazer backup, copie os dois. Para reiniciar o Project Hub, feche o servidor e exclua `projetos-data.json` — isso apaga permanentemente os registros do painel, mas não altera seus projetos de código. Excluir `dashboard-config.json` faz o `/setup` rodar o onboarding do zero.
 
 ## Estrutura do pacote
 

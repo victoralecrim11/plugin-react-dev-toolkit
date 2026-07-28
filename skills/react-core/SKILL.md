@@ -16,6 +16,8 @@ Use em qualquer projeto React web, Next.js ou React Native. Priorize aprendizage
 
 ## Evolução de pastas
 
+O nível de calibração vem de `devLevel` em `dashboard-config.json`, gravado exclusivamente pelo `/setup`. Leia-o em vez de perguntar.
+
 Beginner: `src/{components,screens,repositories,theme,types}`. Junior adiciona `hooks` e `utils`. Mid-Level organiza `features`, `store` e `shared`. Senior só adota domínio/casos de uso quando regras, equipe e longevidade justificarem.
 
 Sempre explique: por que a escolha atende ao caso, alternativa, trade-off e quando evitá-la. Antes de propor arquitetura avançada, entregue um MVP funcional.

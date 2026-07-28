@@ -1,6 +1,6 @@
 {
   "name": "plugin-react-dev",
-  "version": "1.0.0",
+  "version": "1.2.1",
   "description": "Mentoria e construção de projetos React, Next.js e React Native/Expo com dashboard local.",
   "author": { "name": "Victor Alecrim" },
   "keywords": ["react", "nextjs", "react-native", "expo", "typescript"]

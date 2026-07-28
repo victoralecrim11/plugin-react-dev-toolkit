@@ -4,8 +4,10 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from datetime import datetime, timezone
 from urllib.parse import urlsplit, parse_qs
-import json, os, re, webbrowser
+import json, os, re, sys, webbrowser
 import urllib.request, urllib.error
+
+APP_VERSION = "2026-07-27-v5"
 
 ROOT = Path(__file__).resolve().parent
 DATA_FILE = ROOT / "projetos-data.json"
@@ -18,12 +20,12 @@ SKIP_DIRS = {"node_modules", ".git", "dist", "build", ".next", ".expo", "coverag
 REACT_DEP_MARKERS = ("react", "react-native", "next", "expo")
 
 def load_data():
-    if not DATA_FILE.exists(): return DEFAULT.copy()
+    if not DATA_FILE.exists(): return json.loads(json.dumps(DEFAULT))
     try:
         data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
-        for key, value in DEFAULT.items(): data.setdefault(key, value)
+        for key, value in DEFAULT.items(): data.setdefault(key, json.loads(json.dumps(value)))
         return data
-    except (OSError, json.JSONDecodeError): return DEFAULT.copy()
+    except (OSError, json.JSONDecodeError): return json.loads(json.dumps(DEFAULT))
 
 def save_data(data):
     DATA_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -41,7 +43,8 @@ def save_config(cfg):
 
 def stamp(item):
     item["updatedAt"] = datetime.now(timezone.utc).isoformat()
-    item.setdefault("id", str(int(datetime.now(timezone.utc).timestamp() * 1000000)))
+    if not item.get("id"):
+        item["id"] = str(int(datetime.now(timezone.utc).timestamp() * 1000000))
     return item
 
 def scan_projects(root, max_depth=6):
@@ -78,7 +81,7 @@ def scan_projects(root, max_depth=6):
             "platform": platform,
             "stack": ", ".join(stack),
         })
-        dirnames[:] = []  # não desce dentro de um projeto já identificado
+        dirnames[:] = []  # nao desce dentro de um projeto ja identificado
     return results
 
 CATEGORY_HINTS = ["atoms", "molecules", "organisms", "templates", "pages", "screens", "hooks", "layout", "layouts", "components"]
@@ -103,7 +106,7 @@ def scan_components(root, max_depth=8):
             if not filename.endswith((".tsx", ".jsx")): continue
             if filename.endswith(IGNORED_SUFFIXES): continue
             stem = filename.rsplit(".", 1)[0]
-            if not stem[:1].isupper(): continue  # convenção de componente React: PascalCase
+            if not stem[:1].isupper(): continue  # convencao de componente React: PascalCase
             file_path = Path(dirpath) / filename
             try:
                 content = file_path.read_text(encoding="utf-8", errors="ignore")
@@ -128,24 +131,28 @@ def github_api(path, token=""):
     url = "https://api.github.com" + path
     headers = {"Accept": "application/vnd.github+json", "User-Agent": "react-dev-hub-dashboard"}
     if token:
-        headers["Authorization"] = f"Bearer {token}"
+        headers["Authorization"] = "Bearer " + token
     req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=10) as r:
             return json.loads(r.read().decode("utf-8")), None
     except urllib.error.HTTPError as e:
-        msg = "Usuário/token inválido ou limite de requisições atingido" if e.code in (401, 403) else f"GitHub retornou {e.code}"
+        msg = "Usuario/token invalido ou limite de requisicoes atingido" if e.code in (401, 403) else "GitHub retornou %s" % e.code
         return None, msg
     except urllib.error.URLError:
-        return None, "Sem conexão com a internet"
+        return None, "Sem conexao com a internet"
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs): super().__init__(*args, directory=str(ROOT), **kwargs)
 
     def send_json(self, status, payload):
         raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        self.send_response(status); self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(raw))); self.end_headers(); self.wfile.write(raw)
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(raw)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(raw)
 
     def read_json(self):
         length = int(self.headers.get("Content-Length", "0"))
@@ -155,6 +162,8 @@ class Handler(SimpleHTTPRequestHandler):
         parsed = urlsplit(self.path)
         qs = parse_qs(parsed.query)
 
+        if parsed.path == "/api/version":
+            return self.send_json(200, {"version": APP_VERSION, "root": str(ROOT), "html": str(HTML_FILE), "data": str(DATA_FILE)})
         if parsed.path == "/api/data": return self.send_json(200, load_data())
         if parsed.path == "/api/config": return self.send_json(200, load_config())
 
@@ -169,19 +178,24 @@ class Handler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/scan-components":
             project_id = qs.get("projectId", [""])[0]
             data = load_data()
-            project = next((p for p in data["projects"] if p.get("id") == project_id), None)
-            if not project: return self.send_json(404, {"error": "Projeto não encontrado"})
-            if not project.get("path"): return self.send_json(400, {"error": "Este projeto não tem um caminho local salvo. Edite o projeto e preencha o campo Caminho local."})
+            project = next((p for p in data["projects"] if str(p.get("id")) == str(project_id)), None)
+            if not project:
+                return self.send_json(404, {"error": "Projeto nao encontrado (id %s)" % project_id})
+            if not project.get("path"):
+                return self.send_json(400, {"error": "Este projeto nao tem um caminho local salvo. Edite o projeto e preencha o campo 'Caminho local'."})
+            if not Path(project["path"]).expanduser().is_dir():
+                return self.send_json(400, {"error": "A pasta '%s' nao existe ou nao e acessivel." % project["path"]})
             found = scan_components(project["path"])
             registered = {(c.get("project"), c.get("path")) for c in data["components"]}
             for c in found: c["alreadyRegistered"] = (project.get("name"), c["path"]) in registered
-            return self.send_json(200, {"projectId": project_id, "projectName": project.get("name", ""), "found": found})
+            return self.send_json(200, {"projectId": project_id, "projectName": project.get("name", ""),
+                                        "projectPath": project.get("path", ""), "found": found})
 
         if parsed.path == "/api/github/repos":
             cfg = load_config()
             username = cfg.get("githubUsername", "")
-            if not username: return self.send_json(400, {"error": "Configure seu usuário do GitHub em Configurações."})
-            result, err = github_api(f"/users/{username}/repos?per_page=100&sort=updated", cfg.get("githubToken", ""))
+            if not username: return self.send_json(400, {"error": "Configure seu usuario do GitHub em Configuracoes."})
+            result, err = github_api("/users/%s/repos?per_page=100&sort=updated" % username, cfg.get("githubToken", ""))
             if err: return self.send_json(502, {"error": err})
             registered = {p.get("repoUrl") for p in load_data()["projects"]}
             repos = [{
@@ -194,11 +208,11 @@ class Handler(SimpleHTTPRequestHandler):
 
         if parsed.path == "/api/github/repo-info":
             repo = qs.get("repo", [""])[0]
-            if not repo: return self.send_json(400, {"error": "Parâmetro repo é obrigatório (owner/nome)."})
+            if not repo: return self.send_json(400, {"error": "Parametro repo e obrigatorio (owner/nome)."})
             cfg = load_config()
-            info, err = github_api(f"/repos/{repo}", cfg.get("githubToken", ""))
+            info, err = github_api("/repos/" + repo, cfg.get("githubToken", ""))
             if err: return self.send_json(502, {"error": err})
-            commits, cerr = github_api(f"/repos/{repo}/commits?per_page=1", cfg.get("githubToken", ""))
+            commits, cerr = github_api("/repos/%s/commits?per_page=1" % repo, cfg.get("githubToken", ""))
             last_msg = commits[0]["commit"]["message"].split("\n")[0] if not cerr and commits else ""
             last_date = commits[0]["commit"]["author"]["date"] if not cerr and commits else ""
             return self.send_json(200, {
@@ -206,18 +220,38 @@ class Handler(SimpleHTTPRequestHandler):
                 "lastCommitMessage": last_msg, "lastCommitDate": last_date,
             })
 
-        if parsed.path in ("/", "/index.html"): self.path = "/dashboard-template.html"
+        if parsed.path in ("/", "/index.html", "/dashboard-template.html"):
+            return self.serve_html()
         return super().do_GET()
+
+    def serve_html(self):
+        # Le o HTML do disco a cada requisicao e envia com no-store, sem passar pelo cache
+        # condicional (If-Modified-Since / ETag) do SimpleHTTPRequestHandler. Era esse cache
+        # que gerava "304 Not Modified" e fazia o navegador continuar usando a versao antiga
+        # do arquivo mesmo depois de ele ter sido substituido no disco.
+        try:
+            raw = HTML_FILE.read_bytes()
+        except OSError:
+            return self.send_json(404, {"error": "dashboard-template.html nao encontrado em " + str(HTML_FILE)})
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(raw)))
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        self.end_headers()
+        self.wfile.write(raw)
 
     def do_POST(self):
         try: payload = self.read_json()
-        except json.JSONDecodeError: return self.send_json(400, {"error": "JSON inválido"})
+        except json.JSONDecodeError: return self.send_json(400, {"error": "JSON invalido"})
 
         if self.path == "/api/config":
             cfg = load_config(); cfg.update(payload); save_config(cfg)
             return self.send_json(200, cfg)
 
-        data = load_data(); collection = {"/api/projects": "projects", "/api/components": "components", "/api/reviews": "reviews"}.get(self.path)
+        data = load_data()
+        collection = {"/api/projects": "projects", "/api/components": "components", "/api/reviews": "reviews"}.get(self.path)
         if collection:
             item = stamp(payload); items = data[collection]
             old = next((i for i, value in enumerate(items) if value.get("id") == item["id"]), None)
@@ -227,19 +261,29 @@ class Handler(SimpleHTTPRequestHandler):
         if self.path == "/api/checklists":
             project_id = str(payload.get("projectId", "")); data["checklists"][project_id] = payload.get("items", {})
             save_data(data); return self.send_json(200, data["checklists"][project_id])
-        return self.send_json(404, {"error": "Endpoint não encontrado"})
+        return self.send_json(404, {"error": "Endpoint nao encontrado"})
 
     def do_DELETE(self):
         parts = self.path.strip("/").split("/")
-        if len(parts) != 3 or parts[0] != "api": return self.send_json(404, {"error": "Rota inválida"})
+        if len(parts) != 3 or parts[0] != "api": return self.send_json(404, {"error": "Rota invalida"})
         collection = {"projects": "projects", "components": "components", "reviews": "reviews"}.get(parts[1])
-        if not collection: return self.send_json(404, {"error": "Coleção inválida"})
+        if not collection: return self.send_json(404, {"error": "Colecao invalida"})
         data = load_data(); data[collection] = [x for x in data[collection] if x.get("id") != parts[2]]; save_data(data)
         return self.send_json(200, {"ok": True})
 
 if __name__ == "__main__":
+    print("=" * 70)
+    print(" Project Hub", APP_VERSION)
+    print(" Pasta lida por este servidor :", ROOT)
+    print(" HTML  :", HTML_FILE, "(existe)" if HTML_FILE.exists() else "(NAO ENCONTRADO!)")
+    print(" Dados :", DATA_FILE, "(existe)" if DATA_FILE.exists() else "(sera criado no primeiro registro)")
+    print("=" * 70)
+    if not HTML_FILE.exists():
+        print("\nERRO: o dashboard-template.html precisa estar NA MESMA PASTA deste .py.")
+        print("Coloque os dois arquivos juntos em", ROOT, "e rode de novo.\n")
+        sys.exit(1)
     server = ThreadingHTTPServer(("127.0.0.1", 8766), Handler)
-    print("Project Hub em http://127.0.0.1:8766")
+    print("Abra http://127.0.0.1:8766")
     webbrowser.open("http://127.0.0.1:8766")
     try: server.serve_forever()
     except KeyboardInterrupt: print("\nServidor encerrado.")

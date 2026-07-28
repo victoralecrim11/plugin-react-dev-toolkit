@@ -3,58 +3,62 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
     <title>React Dev Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-slate-950 text-slate-100 min-h-screen">
+    <!-- Banner de diagnóstico: fica visível se o JS quebrar ou se HTML e servidor estiverem em versões diferentes -->
+    <div id="diagBanner" class="hidden bg-rose-900 text-rose-100 px-4 py-3 text-sm font-mono"></div>
+
     <main class="max-w-7xl mx-auto p-6">
       <header class="flex flex-wrap justify-between gap-4 mb-8">
         <div>
           <p class="text-blue-400 font-semibold">PROJECT HUB</p>
           <h1 class="text-3xl font-bold">React Dev Hub</h1>
-          <p class="text-slate-400">
-            Projetos, design system, reviews e evolução arquitetural.
-          </p>
+          <p class="text-slate-400">Projetos, design system, reviews e evolução arquitetural.</p>
+          <p class="text-xs text-slate-600 mt-1">HTML <span id="htmlVersion"></span> · servidor <span id="serverVersion">?</span></p>
         </div>
         <div class="flex gap-2 items-start flex-wrap">
-          <button onclick="openProject()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-medium">+ Projeto</button>
-          <button onclick="openForm('components')" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-medium">+ Componente</button>
-          <button onclick="openForm('reviews')" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-medium">+ Review</button>
-          <button onclick="openScan()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg font-medium">🔍 Escanear pasta</button>
-          <button onclick="openGithub()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-medium">🐙 GitHub</button>
-          <button onclick="openConfig()" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-lg font-medium" title="Configurações">⚙️</button>
+          <button type="button" data-action="new-project" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-medium">+ Projeto</button>
+          <button type="button" data-action="new-component" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-medium">+ Componente</button>
+          <button type="button" data-action="new-review" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-medium">+ Review</button>
+          <button type="button" data-action="open-scan" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg font-medium">🔍 Escanear pasta</button>
+          <button type="button" data-action="open-github" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-medium">🐙 GitHub</button>
+          <button type="button" data-action="open-config" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-lg font-medium" title="Configurações">⚙️</button>
         </div>
       </header>
+
       <section id="metrics" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"></section>
       <nav class="flex gap-2 border-b border-slate-800 mb-6">
-        <button data-tab="projects" class="tab px-3 py-2">Projetos</button
-        ><button data-tab="components" class="tab px-3 py-2">Componentes</button
-        ><button data-tab="reviews" class="tab px-3 py-2">Reviews</button>
+        <button type="button" data-tab="projects" class="tab px-3 py-2">Projetos</button
+        ><button type="button" data-tab="components" class="tab px-3 py-2">Componentes</button
+        ><button type="button" data-tab="reviews" class="tab px-3 py-2">Reviews</button>
       </nav>
       <section id="content"></section>
     </main>
 
     <!-- Modal genérico: projetos / componentes / reviews -->
     <dialog id="modal" class="bg-slate-900 text-slate-100 rounded-xl p-0 w-full max-w-lg backdrop:bg-black/70">
-      <form method="dialog" class="p-6">
+      <div class="p-6">
         <div class="flex justify-between items-center mb-4">
           <h2 id="modalTitle" class="text-xl font-bold"></h2>
-          <button class="text-slate-400">×</button>
+          <button type="button" data-action="close" data-target="modal" class="text-slate-400 text-xl leading-none">×</button>
         </div>
         <div id="fields" class="space-y-3"></div>
         <div class="flex justify-end gap-2 mt-6">
-          <button class="px-3 py-2">Cancelar</button
-          ><button type="button" onclick="saveForm()" class="bg-blue-600 px-3 py-2 rounded">Salvar</button>
+          <button type="button" data-action="close" data-target="modal" class="px-3 py-2">Cancelar</button>
+          <button type="button" data-action="save-form" class="bg-blue-600 px-3 py-2 rounded">Salvar</button>
         </div>
-      </form>
+      </div>
     </dialog>
 
     <!-- Modal de configurações -->
     <dialog id="configModal" class="bg-slate-900 text-slate-100 rounded-xl p-0 w-full max-w-lg backdrop:bg-black/70">
-      <form method="dialog" class="p-6">
+      <div class="p-6">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-bold">Configurações</h2>
-          <button class="text-slate-400">×</button>
+          <button type="button" data-action="close" data-target="configModal" class="text-slate-400 text-xl leading-none">×</button>
         </div>
         <div class="space-y-3">
           <label class="block text-sm text-slate-300">Pasta padrão para scan
@@ -66,69 +70,91 @@
           <label class="block text-sm text-slate-300">Token do GitHub (opcional, p/ repos privados e limite maior)
             <input id="cfgGithubToken" type="password" class="mt-1 w-full bg-slate-800 border border-slate-700 rounded p-2 text-white">
           </label>
-          <p class="text-xs text-slate-500">O token fica salvo apenas localmente em dashboard-config.json, nunca sai da sua máquina. Crie um em github.com/settings/tokens (permissão "repo" só se precisar de repositórios privados).</p>
+          <p class="text-xs text-slate-500">O token fica salvo apenas localmente em dashboard-config.json, nunca sai da sua máquina.</p>
         </div>
         <div class="flex justify-end gap-2 mt-6">
-          <button class="px-3 py-2">Cancelar</button
-          ><button type="button" onclick="saveConfig()" class="bg-blue-600 px-3 py-2 rounded">Salvar</button>
+          <button type="button" data-action="close" data-target="configModal" class="px-3 py-2">Cancelar</button>
+          <button type="button" data-action="save-config" class="bg-blue-600 px-3 py-2 rounded">Salvar</button>
         </div>
-      </form>
+      </div>
     </dialog>
 
     <!-- Modal de scan local -->
     <dialog id="scanModal" class="bg-slate-900 text-slate-100 rounded-xl p-0 w-full max-w-2xl backdrop:bg-black/70">
-      <form method="dialog" class="p-6">
+      <div class="p-6">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-bold">Escanear projetos React</h2>
-          <button class="text-slate-400">×</button>
+          <button type="button" data-action="close" data-target="scanModal" class="text-slate-400 text-xl leading-none">×</button>
         </div>
         <div class="flex gap-2 mb-4">
           <input id="scanPath" class="flex-1 bg-slate-800 border border-slate-700 rounded p-2 text-white" placeholder="Caminho da pasta">
-          <button type="button" onclick="runScan()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded">Buscar</button>
+          <button type="button" data-action="run-scan" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded">Buscar</button>
         </div>
         <div id="scanResults" class="space-y-2 max-h-96 overflow-y-auto"></div>
         <div class="flex justify-end gap-2 mt-6">
-          <button class="px-3 py-2">Fechar</button
-          ><button type="button" onclick="importScanned()" class="bg-blue-600 px-3 py-2 rounded">Importar selecionados</button>
+          <button type="button" data-action="close" data-target="scanModal" class="px-3 py-2">Fechar</button>
+          <button type="button" data-action="import-scan" class="bg-blue-600 px-3 py-2 rounded">Importar selecionados</button>
         </div>
-      </form>
+      </div>
     </dialog>
 
     <!-- Modal de importação GitHub -->
     <dialog id="githubModal" class="bg-slate-900 text-slate-100 rounded-xl p-0 w-full max-w-2xl backdrop:bg-black/70">
-      <form method="dialog" class="p-6">
+      <div class="p-6">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-bold">Importar do GitHub</h2>
-          <button class="text-slate-400">×</button>
+          <button type="button" data-action="close" data-target="githubModal" class="text-slate-400 text-xl leading-none">×</button>
+        </div>
+        <div class="flex justify-between items-center gap-2 mb-4">
+          <p class="text-slate-400 text-sm">Selecione os repositórios para importar.</p>
+          <button type="button" data-action="uncheck-github" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded">Desmarcar todos</button>
         </div>
         <div id="githubResults" class="space-y-2 max-h-96 overflow-y-auto"></div>
         <div class="flex justify-end gap-2 mt-6">
-          <button class="px-3 py-2">Fechar</button
-          ><button type="button" onclick="importGithub()" class="bg-blue-600 px-3 py-2 rounded">Importar selecionados</button>
+          <button type="button" data-action="close" data-target="githubModal" class="px-3 py-2">Fechar</button>
+          <button type="button" data-action="import-github" class="bg-blue-600 px-3 py-2 rounded">Importar selecionados</button>
         </div>
-      </form>
+      </div>
     </dialog>
 
     <!-- Modal de detecção de componentes -->
     <dialog id="componentScanModal" class="bg-slate-900 text-slate-100 rounded-xl p-0 w-full max-w-2xl backdrop:bg-black/70">
-      <form method="dialog" class="p-6">
+      <div class="p-6">
         <div class="flex justify-between items-center mb-4">
           <h2 id="componentScanTitle" class="text-xl font-bold">Detectar componentes</h2>
-          <button class="text-slate-400">×</button>
+          <button type="button" data-action="close" data-target="componentScanModal" class="text-slate-400 text-xl leading-none">×</button>
         </div>
         <div id="componentScanResults" class="space-y-2 max-h-96 overflow-y-auto"></div>
         <div class="flex justify-end gap-2 mt-6">
-          <button class="px-3 py-2">Fechar</button
-          ><button type="button" onclick="importComponentScan()" class="bg-blue-600 px-3 py-2 rounded">Importar selecionados</button>
+          <button type="button" data-action="close" data-target="componentScanModal" class="px-3 py-2">Fechar</button>
+          <button type="button" data-action="import-components" class="bg-blue-600 px-3 py-2 rounded">Importar selecionados</button>
         </div>
-      </form>
+      </div>
     </dialog>
 
     <script>
+      const APP_VERSION = "2026-07-27-v5";
+
+      // --- Diagnóstico: nada mais falha em silêncio ---
+      function diag(msg) {
+        const el = document.querySelector("#diagBanner");
+        el.classList.remove("hidden");
+        el.textContent = msg;
+      }
+      window.addEventListener("error", (e) => diag("Erro de JavaScript: " + e.message + " (linha " + e.lineno + ")"));
+      window.addEventListener("unhandledrejection", (e) => diag("Falha em requisição: " + (e.reason && e.reason.message ? e.reason.message : e.reason)));
+      document.querySelector("#htmlVersion").textContent = APP_VERSION;
+
       let data = { projects: [], components: [], reviews: [], checklists: {} },
         tab = "projects", editing = null,
         config = { scanRoot: "", githubUsername: "", githubToken: "" },
         scanFound = [], githubFound = [], componentScanFound = [], componentScanProject = null;
+
+      const modal = document.getElementById("modal");
+      const configModal = document.getElementById("configModal");
+      const scanModal = document.getElementById("scanModal");
+      const githubModal = document.getElementById("githubModal");
+      const componentScanModal = document.getElementById("componentScanModal");
 
       const labels = { projects: "Projetos", components: "Componentes", reviews: "Code review" };
       const fields = {
@@ -143,9 +169,9 @@
       };
 
       async function api(url, opt = {}) {
-        const r = await fetch(url, opt);
+        const r = await fetch(url, Object.assign({ cache: "no-store" }, opt));
         const body = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(body.error || "Não foi possível completar a operação");
+        if (!r.ok) throw new Error(body.error || ("Servidor respondeu " + r.status + " em " + url));
         return body;
       }
       async function load() { data = await api("/api/data"); render(); }
@@ -154,6 +180,18 @@
         document.querySelector("#cfgScanRoot").value = config.scanRoot || "";
         document.querySelector("#cfgGithubUsername").value = config.githubUsername || "";
         document.querySelector("#cfgGithubToken").value = config.githubToken || "";
+      }
+      async function checkVersion() {
+        try {
+          const v = await api("/api/version");
+          document.querySelector("#serverVersion").textContent = v.version;
+          if (v.version !== APP_VERSION)
+            diag("Versões diferentes: este HTML é " + APP_VERSION + " mas o dashboard-server.py rodando é " + v.version +
+                 ". Você substituiu apenas um dos dois arquivos, ou o servidor está lendo outra pasta: " + (v.root || "?"));
+        } catch (e) {
+          document.querySelector("#serverVersion").textContent = "antigo";
+          diag("O dashboard-server.py em execução é uma versão antiga (não tem /api/version). Substitua o .py e reinicie o servidor.");
+        }
       }
 
       function metric(title, value) {
@@ -167,7 +205,7 @@
         document.querySelector("#content").innerHTML = tab === "projects" ? projects() : tab === "components" ? table("components") : table("reviews");
       }
       function escape(s = "") {
-        return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+        return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
       }
       function projects() {
         if (!data.projects.length) return empty("Nenhum projeto registrado.");
@@ -175,14 +213,14 @@
           <div class="flex justify-between"><h2 class="font-bold text-lg">${escape(p.name)}</h2><span class="text-xs bg-blue-950 text-blue-300 rounded px-2 py-1">${escape(p.status || "Em andamento")}</span></div>
           <p class="text-slate-400 mt-2">${escape(p.platform || "React")} · ${escape(p.reactVersion || "TypeScript")}</p>
           <p class="text-sm mt-3">${escape(p.stack || "")}</p>
-          <p class="text-xs text-slate-500 mt-2">${escape(p.path || "")}</p>
-          ${p.repoUrl ? `<p class="text-xs mt-2"><a href="https://github.com/${escape(p.repoUrl)}" target="_blank" class="text-blue-300 underline">github.com/${escape(p.repoUrl)}</a></p><p id="ghinfo-${p.id}" class="text-xs text-slate-400 mt-1"></p>` : ""}
+          <p class="text-xs text-slate-500 mt-2">${escape(p.path || "sem caminho local salvo")}</p>
+          ${p.repoUrl ? `<p class="text-xs mt-2"><a href="https://github.com/${escape(p.repoUrl)}" target="_blank" class="text-blue-300 underline">github.com/${escape(p.repoUrl)}</a></p><p id="ghinfo-${escape(p.id)}" class="text-xs text-slate-400 mt-1"></p>` : ""}
           <div class="mt-4 flex gap-2 flex-wrap">
-            <button onclick="openProject('${p.id}')" class="text-blue-300">Editar</button>
-            <button onclick="checklist('${p.id}')" class="text-emerald-300">Checklist</button>
-            <button onclick="openComponentScan('${p.id}','${escape(p.name)}')" class="text-purple-300">Detectar componentes</button>
-            ${p.repoUrl ? `<button onclick="loadGithubInfo('${p.id}','${escape(p.repoUrl)}')" class="text-amber-300">Atualizar GitHub</button>` : ""}
-            <button onclick="remove('projects','${p.id}')" class="text-rose-300">Excluir</button>
+            <button type="button" data-action="edit-project" data-id="${escape(p.id)}" class="text-blue-300">Editar</button>
+            <button type="button" data-action="checklist" data-id="${escape(p.id)}" class="text-emerald-300">Checklist</button>
+            <button type="button" data-action="scan-components" data-id="${escape(p.id)}" data-name="${escape(p.name)}" class="text-purple-300">Detectar componentes</button>
+            ${p.repoUrl ? `<button type="button" data-action="github-info" data-id="${escape(p.id)}" data-repo="${escape(p.repoUrl)}" class="text-amber-300">Atualizar GitHub</button>` : ""}
+            <button type="button" data-action="delete" data-type="projects" data-id="${escape(p.id)}" class="text-rose-300">Excluir</button>
           </div>
         </article>`).join("")}</div>`;
       }
@@ -190,22 +228,22 @@
         const list = data[type];
         if (!list.length) return empty("Nenhum registro ainda.");
         const cols = fields[type].slice(0, 4);
-        return `<div class="overflow-x-auto bg-slate-900 rounded-xl border border-slate-800"><table class="w-full text-left"><thead class="text-slate-400 text-sm"><tr>${cols.map((c) => `<th class="p-3">${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>${list.map((x) => `<tr class="border-t border-slate-800">${cols.map((c) => `<td class="p-3">${escape(Array.isArray(x[c[0]]) ? x[c[0]].join(", ") : x[c[0]])}</td>`).join("")}<td><button onclick="openForm('${type}','${x.id}')" class="text-blue-300">Editar</button> <button onclick="remove('${type}','${x.id}')" class="text-rose-300">Excluir</button></td></tr>`).join("")}</tbody></table></div>`;
+        return `<div class="overflow-x-auto bg-slate-900 rounded-xl border border-slate-800"><table class="w-full text-left"><thead class="text-slate-400 text-sm"><tr>${cols.map((c) => `<th class="p-3">${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>${list.map((x) => `<tr class="border-t border-slate-800">${cols.map((c) => `<td class="p-3">${escape(Array.isArray(x[c[0]]) ? x[c[0]].join(", ") : x[c[0]])}</td>`).join("")}<td class="p-3 whitespace-nowrap"><button type="button" data-action="edit-item" data-type="${type}" data-id="${escape(x.id)}" class="text-blue-300">Editar</button> <button type="button" data-action="delete" data-type="${type}" data-id="${escape(x.id)}" class="text-rose-300">Excluir</button></td></tr>`).join("")}</tbody></table></div>`;
       }
       function empty(t) { return `<div class="p-10 text-center border border-dashed border-slate-700 rounded-xl text-slate-400">${t}</div>`; }
-      function openProject(id) { openForm("projects", id); }
+
       function openForm(type, id) {
         editing = { type, id };
         const item = id ? data[type].find((x) => x.id === id) : {};
         document.querySelector("#modalTitle").textContent = (id ? "Editar " : "Novo ") + labels[type];
         document.querySelector("#fields").innerHTML = fields[type].map(([key, label]) =>
-          `<label class="block text-sm text-slate-300">${label}<input data-key="${key}" value="${escape(Array.isArray(item?.[key]) ? item[key].join(", ") : item?.[key] || "")}" class="mt-1 w-full bg-slate-800 border border-slate-700 rounded p-2 text-white"></label>`
+          `<label class="block text-sm text-slate-300">${label}<input data-key="${key}" value="${escape(Array.isArray(item && item[key]) ? item[key].join(", ") : (item && item[key]) || "")}" class="mt-1 w-full bg-slate-800 border border-slate-700 rounded p-2 text-white"></label>`
         ).join("");
         modal.showModal();
       }
       async function saveForm() {
         const item = { id: editing.id };
-        document.querySelectorAll("[data-key]").forEach((el) => (item[el.dataset.key] = el.value.trim()));
+        document.querySelectorAll("#fields [data-key]").forEach((el) => (item[el.dataset.key] = el.value.trim()));
         if (editing.type === "reviews") item.debts = item.debts ? item.debts.split(",").map((x) => x.trim()).filter(Boolean) : [];
         await api("/api/" + editing.type, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(item) });
         modal.close(); load();
@@ -225,7 +263,6 @@
       }
 
       // --- Configurações ---
-      function openConfig() { configModal.showModal(); }
       async function saveConfig() {
         config = await api("/api/config", {
           method: "POST", headers: { "Content-Type": "application/json" },
@@ -238,7 +275,7 @@
         configModal.close();
       }
 
-      // --- Scan local ---
+      // --- Scan de projetos ---
       function openScan() {
         document.querySelector("#scanPath").value = config.scanRoot || "";
         document.querySelector("#scanResults").innerHTML = "";
@@ -252,7 +289,7 @@
         try {
           const res = await api("/api/scan?path=" + encodeURIComponent(path));
           scanFound = res.found;
-          if (!scanFound.length) { box.innerHTML = empty("Nenhum projeto React encontrado nessa pasta."); return; }
+          if (!scanFound.length) { box.innerHTML = empty("Nenhum projeto React encontrado em " + escape(path)); return; }
           box.innerHTML = scanFound.map((p, i) => `<label class="flex items-start gap-3 bg-slate-800 rounded-lg p-3 ${p.alreadyRegistered ? "opacity-50" : ""}">
             <input type="checkbox" data-scan-idx="${i}" ${p.alreadyRegistered ? "disabled" : "checked"} class="mt-1">
             <div><p class="font-medium">${escape(p.name)} ${p.alreadyRegistered ? '<span class="text-xs text-slate-400">(já cadastrado)</span>' : ""}</p>
@@ -272,12 +309,9 @@
       }
 
       // --- GitHub ---
-      function openGithub() {
+      async function openGithub() {
         document.querySelector("#githubResults").innerHTML = `<p class="text-slate-400 text-sm">Buscando repositórios...</p>`;
         githubModal.showModal();
-        fetchGithubRepos();
-      }
-      async function fetchGithubRepos() {
         const box = document.querySelector("#githubResults");
         try {
           githubFound = await api("/api/github/repos");
@@ -299,6 +333,11 @@
         }
         githubModal.close(); load();
       }
+      function uncheckAllGithub() {
+        document.querySelectorAll("[data-gh-idx]").forEach((el) => {
+          el.checked = false;
+        });
+      }
       async function loadGithubInfo(projectId, repo) {
         const el = document.querySelector("#ghinfo-" + projectId);
         el.textContent = "Buscando...";
@@ -309,19 +348,16 @@
       }
 
       // --- Detecção automática de componentes ---
-      function openComponentScan(projectId, projectName) {
+      async function openComponentScan(projectId, projectName) {
         componentScanProject = { id: projectId, name: projectName };
         document.querySelector("#componentScanTitle").textContent = "Detectar componentes — " + projectName;
-        document.querySelector("#componentScanResults").innerHTML = `<p class="text-slate-400 text-sm">Buscando...</p>`;
-        componentScanModal.showModal();
-        runComponentScan(projectId);
-      }
-      async function runComponentScan(projectId) {
         const box = document.querySelector("#componentScanResults");
+        box.innerHTML = `<p class="text-slate-400 text-sm">Buscando...</p>`;
+        componentScanModal.showModal();
         try {
           const res = await api("/api/scan-components?projectId=" + encodeURIComponent(projectId));
           componentScanFound = res.found;
-          if (!componentScanFound.length) { box.innerHTML = empty("Nenhum componente encontrado (procuro arquivos .tsx/.jsx em PascalCase com export)."); return; }
+          if (!componentScanFound.length) { box.innerHTML = empty("Nenhum componente encontrado. Procuro arquivos .tsx/.jsx em PascalCase com export, dentro de " + escape(res.projectPath || "")); return; }
           box.innerHTML = componentScanFound.map((c, i) => `<label class="flex items-start gap-3 bg-slate-800 rounded-lg p-3 ${c.alreadyRegistered ? "opacity-50" : ""}">
             <input type="checkbox" data-comp-idx="${i}" ${c.alreadyRegistered ? "disabled" : "checked"} class="mt-1">
             <div><p class="font-medium">${escape(c.name)} <span class="text-xs text-slate-400">${escape(c.category)}</span> ${c.alreadyRegistered ? '<span class="text-xs text-slate-400">(já cadastrado)</span>' : ""}</p>
@@ -339,8 +375,45 @@
         componentScanModal.close(); load();
       }
 
-      document.querySelectorAll(".tab").forEach((b) => (b.onclick = () => { tab = b.dataset.tab; render(); }));
-      load().catch(() => (document.querySelector("#content").innerHTML = empty("Servidor indisponível. Execute dashboard-server.py.")));
+      // --- Um único listener delegado: nenhum onclick inline, nada quebra por causa de aspas no nome ---
+      const actions = {
+        "new-project": () => openForm("projects"),
+        "new-component": () => openForm("components"),
+        "new-review": () => openForm("reviews"),
+        "open-scan": openScan,
+        "open-github": openGithub,
+        "open-config": () => configModal.showModal(),
+        "save-config": saveConfig,
+        "save-form": saveForm,
+        "run-scan": runScan,
+        "import-scan": importScanned,
+        "import-github": importGithub,
+        "uncheck-github": uncheckAllGithub,
+        "import-components": importComponentScan,
+        "close": (el) => document.getElementById(el.dataset.target).close(),
+        "edit-project": (el) => openForm("projects", el.dataset.id),
+        "edit-item": (el) => openForm(el.dataset.type, el.dataset.id),
+        "checklist": (el) => checklist(el.dataset.id),
+        "scan-components": (el) => openComponentScan(el.dataset.id, el.dataset.name),
+        "github-info": (el) => loadGithubInfo(el.dataset.id, el.dataset.repo),
+        "delete": (el) => remove(el.dataset.type, el.dataset.id),
+      };
+      document.addEventListener("click", (ev) => {
+        const el = ev.target.closest("[data-action]");
+        if (!el) return;
+        const fn = actions[el.dataset.action];
+        if (!fn) return diag("Ação desconhecida: " + el.dataset.action);
+        ev.preventDefault();
+        Promise.resolve(fn(el)).catch((e) => diag("Erro em " + el.dataset.action + ": " + e.message));
+      });
+      document.addEventListener("click", (ev) => {
+        const t = ev.target.closest("[data-tab]");
+        if (!t) return;
+        tab = t.dataset.tab; render();
+      });
+
+      checkVersion();
+      load().catch((e) => { document.querySelector("#content").innerHTML = empty("Servidor indisponível: " + escape(e.message)); });
       loadConfig().catch(() => {});
     </script>
   </body>

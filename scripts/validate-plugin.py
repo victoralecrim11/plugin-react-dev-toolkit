@@ -234,11 +234,38 @@ if "deploy" in expected_menu and "deploy" not in user_only:
 elif "deploy" in user_only:
     O("/deploy exige acao do usuario (disable-model-invocation)")
 
-adv, err = frontmatter("skills/deploy-advisor-extension/SKILL.md") if Path(
-    "skills/deploy-advisor-extension/SKILL.md"
-).exists() else (None, "ausente")
-if adv and adv.get("disable-model-invocation"):
-    O("deploy-advisor-extension bloqueado para o modelo: o fluxo guiado do /deploy fica sob controle do usuario")
+# a base de conhecimento deve ser UMA skill, escondida do menu
+skill_dirs = sorted(os.path.basename(os.path.dirname(f)) for f in skill_files)
+if len(skill_dirs) == 1:
+    O(f"uma unica skill de conhecimento: {skill_dirs[0]}")
+else:
+    W(
+        f"{len(skill_dirs)} skills separadas ({skill_dirs}). Cada SKILL.md aparece no "
+        "inventario de componentes do plugin, que nenhum frontmatter esconde. "
+        "Consolide em uma skill com references/ para nao ve-las listadas."
+    )
+leaked = [s for s in skill_dirs if "extension" in s]
+if leaked:
+    E(f"skills com 'extension' no nome ainda presentes: {leaked}")
+
+ext_hits = [
+    f for f in glob.glob("commands/*.md") + glob.glob("skills/**/*.md", recursive=True)
+    if re.search(r"-extension", Path(f).read_text(encoding="utf-8"))
+]
+if ext_hits:
+    E(f"ainda ha referencia a '-extension' em: {ext_hits}")
+else:
+    O("nenhuma referencia a '-extension' nos arquivos do plugin")
+
+for sd in skill_dirs:
+    fm, _ = frontmatter(f"skills/{sd}/SKILL.md")
+    if fm and fm.get("user-invocable") is not False:
+        E(f"skills/{sd}: sem 'user-invocable: false' -- vai aparecer no menu '/'")
+    if fm and fm.get("disable-model-invocation") and fm.get("user-invocable") is False:
+        E(
+            f"skills/{sd}: user-invocable: false junto com disable-model-invocation "
+            "deixa a skill inalcancavel para o usuario E para o modelo"
+        )
 
 # ---------- higiene ----------
 junk = 0
@@ -256,19 +283,23 @@ if bytecode:
 else:
     O("sem __pycache__/*.pyc")
 
-# caminhos que quebram quando instalado por marketplace
+# caminhos que quebram quando instalado por marketplace.
+# Dentro de um SKILL.md, `references/...` relativo e o padrao de progressive
+# disclosure -- a ancora e o diretorio da propria skill. O problema real e um
+# command apontar para references/ sem ancora nenhuma.
 bad_paths = []
-for f in cmd_files + skill_files:
+for f in glob.glob("commands/*.md"):
     text = Path(f).read_text(encoding="utf-8")
     for m in re.finditer(r"`(?!\$\{CLAUDE_PLUGIN_ROOT\})[^`\n]*references/[^`\n]*`", text):
         bad_paths.append(f"{f}: {m.group(0)}")
+for f in glob.glob("skills/*/SKILL.md"):
+    text = Path(f).read_text(encoding="utf-8")
+    if "references/" in text and "${CLAUDE_PLUGIN_ROOT}" not in text:
+        bad_paths.append(f"{f}: cita references/ sem declarar a ancora")
 if bad_paths:
-    W(
-        "caminhos para references/ sem ${CLAUDE_PLUGIN_ROOT} (plugins instalados "
-        f"sao copiados para o cache): {bad_paths}"
-    )
+    W(f"caminhos para references/ sem ancora: {bad_paths}")
 else:
-    O("referencias de arquivo usam ${CLAUDE_PLUGIN_ROOT}")
+    O("referencias de arquivo ancoradas em ${CLAUDE_PLUGIN_ROOT}")
 
 # ---------- saida ----------
 for o in oks:

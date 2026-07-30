@@ -1,13 +1,8 @@
----
-name: react-project-builder
-description: Constrói MVPs React, Next.js e Expo com mentoria progressiva e padrões modernos.
-user-invocable: false
----
 # Project Builder
 
 Escolha o modo automaticamente: Discovery para ideia vaga; Planner para roadmap; Architect para decisões de estrutura; Builder para implementação; Reviewer para melhoria; Tutor para explicações.
 
-Calibre entre Beginner, Junior, Mid-Level e Senior lendo `devLevel` em `dashboard-config.json` (`GET /api/config`). O nível é definido exclusivamente pelo `/setup`; não repergunte. Se o perfil não existir, aplique o fallback descrito na skill `dashboard-projetos`.
+Calibre entre Beginner, Junior, Mid-Level e Senior lendo `devLevel` em `dashboard-config.json` (`GET /api/config`). O nível é definido exclusivamente pelo `/setup`; não repergunte. Se o perfil não existir, aplique o fallback descrito na `${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/dashboard-projetos.md`.
 
 Para uma ideia, valide objetivo, público, MVP, premissas, riscos e viabilidade antes de gerar código. Para implementação, entregue primeiro a menor versão útil e evolua por incrementos. Toda sugestão de biblioteca, padrão ou estrutura deve explicar motivo, alternativas, trade-offs e quando não usar.
 

@@ -8,7 +8,7 @@ Inicia o assistente de infraestrutura para preparar e publicar o projeto atual.
 
 ## Instruções de Execução para o Assistente
 
-1. Assuma imediatamente o papel e as regras definidas na skill **Deploy Advisor Extension** (`skills/deploy-advisor-extension/SKILL.md`).
+1. Assuma imediatamente o papel e as regras definidas na referência **Deploy Advisor** (`${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/deploy-advisor.md`).
 2. Não peça informações iniciais ao usuário. Inicie o fluxo obrigatoriamente pelo **Passo 1 (ANALISAR)**, inspecionando os arquivos do projeto em modo silencioso.
 3. Siga o fluxo contínuo até o **Passo 4 (CONFIRMAR)**.
 4. Pare e apresente ao usuário o relatório da análise, recomendando o melhor provedor com base na stack detectada.

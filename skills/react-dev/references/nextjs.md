@@ -1,11 +1,5 @@
----
-name: nextjs-extension
-description: Particularidades modernas de Next.js App Router, Server Components, Server Actions e SSR.
-user-invocable: false
----
-# Next.js Extension
-
-Use junto de `react-core` em Next.js. Prefira App Router e TypeScript.
+# Next.js
+Use junto de `${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/react-core.md` em Next.js. Prefira App Router e TypeScript.
 
 - Server Components são o padrão para leitura e composição que não exigem interatividade; use `"use client"` somente em fronteiras que usam estado, eventos ou APIs do navegador.
 - Faça carregamento de dados no servidor quando isso reduzir JavaScript enviado e beneficiar SEO; mantenha segredos e acesso privilegiado no servidor.

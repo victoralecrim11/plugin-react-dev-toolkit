@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.3.4
+# React Dev Hub Plugin — v1.3.5
 
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
@@ -14,7 +14,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.3.3](#react-dev-hub-plugin--v133)
+- [React Dev Hub Plugin — v1.3.5](#react-dev-hub-plugin--v135)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -27,7 +27,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
       - [Deixar o Claude Code atualizar sozinho](#deixar-o-claude-code-atualizar-sozinho)
   - [O ciclo de desenvolvimento](#o-ciclo-de-desenvolvimento)
     - [O fluxo do `/deploy`](#o-fluxo-do-deploy)
-  - [Skills que agem sozinhas](#skills-que-agem-sozinhas)
+  - [A skill que age sozinha](#a-skill-que-age-sozinha)
   - [Perfil persistido](#perfil-persistido)
     - [Alterando o perfil depois](#alterando-o-perfil-depois)
   - [Padrões técnicos](#padrões-técnicos)
@@ -213,20 +213,29 @@ Provedores mapeados: **Vercel, Netlify, Cloudflare Pages, GitHub Pages, Expo EAS
 
 Credenciais nunca entram no código. Elas ficam no painel do provedor ou em **Settings → Secrets and variables → Actions**.
 
-## Skills que agem sozinhas
+## A skill que age sozinha
 
-Além dos comandos que você digita, o pacote traz seis skills **model-invoked**: o assistente as aciona por conta própria conforme o assunto da conversa, sem você invocar nada.
+O pacote traz **uma** skill **model-invoked**: `react-dev`. O assistente a aciona por conta própria conforme o assunto, e ela carrega só o arquivo de referência que a tarefa exige.
 
-Todas carregam `user-invocable: false` no frontmatter, então **não aparecem no menu `/`**. São base de conhecimento, não ações — `/react-core` não seria um comando com significado. Esconder do menu evita que elas se misturem aos sete comandos reais.
+```text
+skills/react-dev/
+├── SKILL.md                   # índice: qual assunto -> qual arquivo
+└── references/
+    ├── react-core.md          # React, TypeScript, Hooks, estado, dados remotos
+    ├── nextjs.md              # App Router, Server Components, Server Actions, SSR
+    ├── react-native.md        # Expo, Expo Router, Hermes, Reanimated
+    ├── project-builder.md     # discovery, MVP, implementação incremental
+    ├── deploy-advisor.md      # deploy, CI/CD, provedores, segredos
+    ├── dashboard-projetos.md  # schema da API do Project Hub
+    └── project-hub/           # o servidor local e o template
+```
 
-| Skill | Entra em cena quando |
-| :-- | :-- |
-| `react-core` | Padrões compartilhados de React, TypeScript, Hooks, Zustand e TanStack Query |
-| `nextjs-extension` | App Router, Server Components, Server Actions, SSR/SSG |
-| `react-native-extension` | Expo, Expo Router, Hermes, Reanimated, particularidades mobile |
-| `react-project-builder` | Discovery, definição de MVP, implementação incremental e review |
-| `deploy-advisor-extension` | Deploy, build de produção, hospedagem, CI/CD, variáveis de ambiente |
-| `dashboard-projetos` | Project Hub, componentes, reviews, métricas, dívida técnica, checklist |
+`SKILL.md` tem `user-invocable: false`, então não aparece no menu `/`. E como é **uma** skill, o painel do plugin lista `react-dev` em vez de seis nomes.
+
+Isso importa por dois motivos:
+
+- **Nada de `/…-extension` em canto nenhum.** Todo `SKILL.md` é um componente e aparece no painel do plugin — nenhum campo de frontmatter esconde isso. A única forma de não ver seis nomes ali é não ter seis skills.
+- **Menos contexto sempre ligado.** Seis descrições de skill custavam ~428 tokens em toda sessão; uma custa ~364.
 
 ## Perfil persistido
 
@@ -330,13 +339,7 @@ plugin-react-dev-toolkit/            # raiz = plugin E marketplace
 ├── .agents/plugins/
 │   └── marketplace.json             # Marketplace padrão do Codex
 ├── commands/                        # Comandos de fluxo de trabalho (skills invocáveis por /)
-├── skills/
-│   ├── react-core/                  # Padrões compartilhados
-│   ├── nextjs-extension/            # Particularidades do Next.js
-│   ├── react-native-extension/      # Particularidades do Expo/RN
-│   ├── react-project-builder/       # Discovery, MVP, implementação e review
-│   ├── deploy-advisor-extension/    # Infraestrutura, CI/CD e publicação
-│   └── dashboard-projetos/          # Project Hub e arquivos de referência
+├── skills/react-dev/                # 1 skill + references/
 ├── scripts/
 │   ├── bump-version.py              # sincroniza a versão nos 3 manifestos
 │   ├── validate-plugin.py           # checagens de estrutura (roda no CI)

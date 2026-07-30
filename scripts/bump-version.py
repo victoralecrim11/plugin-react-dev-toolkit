@@ -30,6 +30,10 @@ TARGETS = {
 
 VERSION_RE = re.compile(r'("version"\s*:\s*")(\d+\.\d+\.\d+)(")')
 
+# No manual.html a versao e texto, nao campo JSON.
+MANUAL = "manual.html"
+MANUAL_RE = re.compile(r'(v)(\d+\.\d+\.\d+)')
+
 
 def read_current():
     p = ROOT / ".claude-plugin/plugin.json"
@@ -96,6 +100,22 @@ def main():
             path.write_text(new_text, encoding="utf-8", newline="\n")
         written.append(f"  {rel}: {current} -> {new}")
 
+    mp = ROOT / MANUAL
+    if not mp.exists():
+        problems.append(f"{MANUAL}: nao encontrado")
+    else:
+        mt = mp.read_text(encoding="utf-8")
+        found = len(MANUAL_RE.findall(mt))
+        if found == 0:
+            problems.append(f"{MANUAL}: nenhuma versao vX.Y.Z encontrada")
+        elif args.check:
+            written.append(f"  {MANUAL}: {found} ocorrencia(s) ok")
+        else:
+            nl = "\r\n" if "\r\n" in mt else "\n"
+            mp.write_text(MANUAL_RE.sub(lambda m: m.group(1) + new, mt),
+                          encoding="utf-8", newline=nl)
+            written.append(f"  {MANUAL}: {found} ocorrencia(s) -> {new}")
+
     if problems:
         print("FALHOU:", file=sys.stderr)
         for p in problems:
@@ -109,6 +129,8 @@ def main():
         for rel in TARGETS:
             for m in VERSION_RE.finditer((ROOT / rel).read_text(encoding="utf-8")):
                 seen.add(m.group(2))
+        for m in MANUAL_RE.finditer((ROOT / MANUAL).read_text(encoding="utf-8")):
+            seen.add(m.group(2))
         if seen != {new}:
             sys.exit(f"erro: versoes divergentes apos o bump: {sorted(seen)}")
         print(f"\nversao sincronizada em {sum(TARGETS.values())} lugares: {new}")

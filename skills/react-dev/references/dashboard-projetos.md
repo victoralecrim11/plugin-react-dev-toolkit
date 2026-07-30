@@ -1,8 +1,3 @@
----
-name: dashboard-projetos
-description: Mantém o Project Hub local para acompanhar projetos React, componentes, code reviews e checklist arquitetural.
-user-invocable: false
----
 # Dashboard de Projetos
 
 Use quando o usuário disser dashboard, projetos, componentes reutilizáveis, reviews, métricas, dívida técnica ou checklist arquitetural. O painel é local, sem banco externo, e usa dois arquivos: `projetos-data.json` para os registros e `dashboard-config.json` para o perfil e as preferências do desenvolvedor.

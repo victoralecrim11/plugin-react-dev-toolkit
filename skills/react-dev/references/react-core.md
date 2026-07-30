@@ -1,8 +1,3 @@
----
-name: react-core
-description: Padrões centrais para projetos React modernos com TypeScript, Hooks, Zustand e TanStack Query.
-user-invocable: false
----
 # React Core
 
 Use em qualquer projeto React web, Next.js ou React Native. Priorize aprendizagem, entrega e manutenção; adapte a explicação ao nível do desenvolvedor.

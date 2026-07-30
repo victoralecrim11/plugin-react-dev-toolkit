@@ -1,11 +1,5 @@
----
-name: react-native-extension
-description: Particularidades modernas de React Native e Expo com TypeScript, Expo Router, Hermes e Reanimated.
-user-invocable: false
----
-# React Native / Expo Extension
-
-Use junto de `react-core` em apps móveis. Prefira Expo managed workflow, TypeScript, Expo Router e Hermes. Só recomende Bare Workflow se uma dependência nativa, integração de plataforma ou requisito de build não for suportado pelo Expo.
+# React Native / Expo
+Use junto de `${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/react-core.md` em apps móveis. Prefira Expo managed workflow, TypeScript, Expo Router e Hermes. Só recomende Bare Workflow se uma dependência nativa, integração de plataforma ou requisito de build não for suportado pelo Expo.
 
 - Organize rotas no Expo Router; mantenha lógica de negócio fora das telas.
 - Use Reanimated e Gesture Handler para animações/gestos fluidos, evitando atualizar estado React a cada frame.

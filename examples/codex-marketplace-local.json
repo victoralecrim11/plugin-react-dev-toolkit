@@ -1,0 +1,21 @@
+{
+  "_comentario": "Exemplo para desenvolvimento local no Codex. Copie para ~/.agents/plugins/marketplace.json e ajuste o path para a pasta onde voce clonou o repositorio. Use 'local' apenas para plugins que ja estao no seu disco; para instalar do GitHub, o repositorio ja traz .agents/plugins/marketplace.json com source 'url'.",
+  "name": "react-dev-local",
+  "interface": {
+    "displayName": "React Dev Hub (local)"
+  },
+  "plugins": [
+    {
+      "name": "plugin-react-dev-toolkit",
+      "source": {
+        "source": "local",
+        "path": "./plugin-react-dev-toolkit"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

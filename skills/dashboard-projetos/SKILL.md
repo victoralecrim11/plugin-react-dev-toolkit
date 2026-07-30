@@ -1,6 +1,7 @@
 ---
 name: dashboard-projetos
 description: Mantém o Project Hub local para acompanhar projetos React, componentes, code reviews e checklist arquitetural.
+user-invocable: false
 ---
 # Dashboard de Projetos
 

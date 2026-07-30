@@ -25,6 +25,7 @@ TARGETS = {
     ".claude-plugin/plugin.json": 1,
     ".claude-plugin/marketplace.json": 2,   # topo + entrada do plugin
     ".codex-plugin/plugin.json": 1,
+    ".agents/plugins/marketplace.json": 1,  # entrada do plugin no marketplace do Codex
 }
 
 VERSION_RE = re.compile(r'("version"\s*:\s*")(\d+\.\d+\.\d+)(")')

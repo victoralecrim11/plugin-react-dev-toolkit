@@ -1,6 +1,7 @@
 ---
 name: nextjs-extension
 description: Particularidades modernas de Next.js App Router, Server Components, Server Actions e SSR.
+user-invocable: false
 ---
 # Next.js Extension
 

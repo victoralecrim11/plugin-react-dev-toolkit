@@ -1,6 +1,7 @@
 ---
 name: react-project-builder
 description: Constrói MVPs React, Next.js e Expo com mentoria progressiva e padrões modernos.
+user-invocable: false
 ---
 # Project Builder
 

@@ -1,6 +1,7 @@
 ---
 name: react-native-extension
 description: Particularidades modernas de React Native e Expo com TypeScript, Expo Router, Hermes e Reanimated.
+user-invocable: false
 ---
 # React Native / Expo Extension
 

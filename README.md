@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.3.2
+# React Dev Hub Plugin — v1.3.3
 
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
@@ -14,7 +14,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.3.2](#react-dev-hub-plugin--v132)
+- [React Dev Hub Plugin — v1.3.3](#react-dev-hub-plugin--v133)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -125,7 +125,7 @@ Se algo não carregar, abra `/plugin` e veja a aba **Errors**.
 
 ### Codex
 
-O marketplace padrão fica em `.agents/plugins/marketplace.json` e aponta para `./`, isto é, para a raiz do repositório onde estão `.codex-plugin/plugin.json` e `skills/`. Para testar uma cópia local, adicione a raiz do repositório como marketplace local e reinicie o aplicativo. Em repositórios privados, o Git usado pelo Codex precisa ter credenciais de leitura para a sua conta; a estrutura do plugin é a mesma.
+O marketplace padrão do Codex fica em `.agents/plugins/marketplace.json` e usa `source: "url"` apontando para o repositório GitHub da raiz do plugin. Esse formato é o recomendado para plugins hospedados em Git, porque o Codex faz o clone e precisa resolver a origem a partir do repositório remoto. Para desenvolvimento local, use o exemplo em `examples/codex-marketplace-local.json` e ajuste o `path` para a pasta onde clonou o repositório. Em repositórios privados, o Git usado pelo Codex precisa ter credenciais de leitura para a sua conta.
 
 ### Comandos após a instalação
 
@@ -151,7 +151,7 @@ As duas plataformas decidem se há atualização comparando o campo `version` do
 
 ```
 .github/workflows/bump-version.yml   # bump + validação + tag, no push da main
-scripts/bump-version.py              # sincroniza a versão nos 3 manifestos
+scripts/bump-version.py              # sincroniza a versão nos 4 manifestos
 scripts/validate-plugin.py           # checagens de estrutura, roda no CI
 scripts/atualizar-plugin.ps1 / .sh   # atualiza sua máquina nas 2 plataformas
 ```
@@ -189,7 +189,7 @@ O Claude Code atualiza marketplaces e plugins em background depois que a sessão
 
 A checagem roda com atraso aleatório de até dez minutos após o início da sessão, e a sessão em andamento continua usando o que carregou no launch: quando houver atualização, aparece um aviso para rodar `/reload-plugins`.
 
-No **Codex não existe auto-update documentado** para plugins de marketplace. O caminho é o `codex plugin marketplace upgrade` do script. Se o plugin estiver instalado como `source: local`, a doc é explícita: *"After you change the plugin, update the plugin directory that your marketplace entry points to and restart Codex"*.
+No **Codex não existe auto-update documentado** para plugins de marketplace. O caminho é o `codex plugin marketplace upgrade` do script. Para a instalação via GitHub, o marketplace usa `source: "url"` e a atualização vem do `upgrade`; para desenvolvimento local, o exemplo em `examples/codex-marketplace-local.json` aponta para a pasta do clone local.
 
 ## O ciclo de desenvolvimento
 

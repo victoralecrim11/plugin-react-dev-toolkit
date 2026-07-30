@@ -1,6 +1,7 @@
 ---
 name: react-core
 description: Padrões centrais para projetos React modernos com TypeScript, Hooks, Zustand e TanStack Query.
+user-invocable: false
 ---
 # React Core
 

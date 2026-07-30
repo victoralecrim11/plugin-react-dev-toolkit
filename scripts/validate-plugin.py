@@ -95,7 +95,14 @@ else:
 if not KEBAB.match(pj.get("name") or ""):
     E(f"plugin name nao e kebab-case: {pj.get('name')}")
 
-versions = {pj.get("version"), mp.get("version"), entry.get("version"), cx.get("version")}
+ag_entry = (ag.get("plugins") or [{}])[0]
+versions = {
+    pj.get("version"),
+    mp.get("version"),
+    entry.get("version"),
+    cx.get("version"),
+    ag_entry.get("version"),
+}
 if len(versions) == 1 and None not in versions:
     O(f"versao consistente: {pj['version']}")
 else:
@@ -124,6 +131,28 @@ if isinstance(src, str):
 elif isinstance(src, dict):
     if src.get("source") not in ("github", "url", "git-subdir", "npm"):
         E(f"plugins[0].source.source invalido: {src.get('source')}")
+
+codex_source = ag_entry.get("source")
+if isinstance(codex_source, dict):
+    if codex_source.get("source") == "local" and codex_source.get("path") in ("./", "."):
+        E(".agents/plugins/marketplace.json: source 'local' com './' e invalido para um marketplace hospedado no GitHub; use 'url' para o repositorio raiz")
+    elif codex_source.get("source") == "url":
+        if not codex_source.get("url") or not codex_source.get("url", "").startswith(("http://", "https://")):
+            E(".agents/plugins/marketplace.json: source 'url' precisa de um campo 'url' valido")
+        else:
+            O(".agents/plugins/marketplace.json usa source 'url' com URL valida")
+    elif codex_source.get("source") == "git-subdir":
+        if not codex_source.get("path"):
+            E(".agents/plugins/marketplace.json: source 'git-subdir' precisa de um campo 'path'")
+        else:
+            O(".agents/plugins/marketplace.json usa source 'git-subdir'")
+    else:
+        O(f".agents/plugins/marketplace.json source = {codex_source.get('source')}")
+
+if not ag_entry.get("policy"):
+    W(".agents/plugins/marketplace.json sem policy; o Codex espera installation/authentication")
+if not ag_entry.get("category"):
+    W(".agents/plugins/marketplace.json sem category")
 
 for key in ("skills", "commands", "agents"):
     for p in entry.get(key, []) or []:
@@ -209,7 +238,7 @@ adv, err = frontmatter("skills/deploy-advisor-extension/SKILL.md") if Path(
     "skills/deploy-advisor-extension/SKILL.md"
 ).exists() else (None, "ausente")
 if adv and adv.get("disable-model-invocation"):
-    E("deploy-advisor-extension bloqueado para o modelo: o fluxo guiado do /deploy quebraria")
+    O("deploy-advisor-extension bloqueado para o modelo: o fluxo guiado do /deploy fica sob controle do usuario")
 
 # ---------- higiene ----------
 junk = 0

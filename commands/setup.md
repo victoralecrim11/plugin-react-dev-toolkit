@@ -38,7 +38,9 @@ Explique que TypeScript estrito é obrigatório e não é configurável.
 
 Apenas no **modo instalação**. Vem antes da gravação do perfil: sem os arquivos copiados não existe `dashboard-config.json` nem servidor para receber o `POST`.
 
-1. Copie `skills/dashboard-projetos/references/dashboard-server.py`, `dashboard-template.html` e o inicializador do sistema operacional para a pasta-base escolhida.
+1. Copie `${CLAUDE_PLUGIN_ROOT}/skills/dashboard-projetos/references/dashboard-server.py`, `dashboard-template.html` e o inicializador do sistema operacional para a pasta-base escolhida.
+
+   > `${CLAUDE_PLUGIN_ROOT}` e a raiz do plugin instalado. Use sempre essa variavel: quando o plugin e instalado por um marketplace, os arquivos ficam em um cache (`~/.claude/plugins/cache/...`) e caminhos relativos ao projeto do usuario nao resolvem.
 2. Escreva `dashboard-config.json` na pasta-base, ao lado de `dashboard-server.py`, com os campos do perfil (ver Etapa 3).
 
    > **Nunca sobrescreva um `dashboard-config.json` que já existe.** O arquivo também guarda `githubUsername` e `githubToken`, que não pertencem ao perfil e seriam perdidos. Se o arquivo existir, você está em modo reconfiguração: volte à Etapa 0 e use `POST /api/config`, que faz merge parcial.

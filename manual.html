@@ -10,7 +10,7 @@
     <main class="max-w-4xl mx-auto p-8">
       <div class="flex flex-wrap items-baseline justify-between gap-3">
         <p class="text-blue-400 font-semibold">MANUAL INTERATIVO</p>
-        <p class="text-xs text-slate-500 font-mono">v1.3.0</p>
+        <p class="text-xs text-slate-500 font-mono">v1.3.1</p>
       </div>
       <h1 class="text-4xl font-bold mt-2">React Dev Hub</h1>
       <p class="text-slate-400 mt-3">
@@ -204,12 +204,18 @@
         <h2 class="font-bold">As skills agem sozinhas</h2>
         <p class="mt-3 text-slate-300 text-sm">
           Além dos comandos que você digita, o pacote traz seis skills que o
-          assistente aciona por conta própria conforme o assunto da conversa:
+          assistente aciona por conta própria conforme o assunto da conversa. Elas
+          não aparecem no menu <code>/</code> de propósito — são base de
+          conhecimento, não ações:
           <code>react-core</code>, <code>nextjs-extension</code>,
           <code>react-native-extension</code>,
           <code>react-project-builder</code>,
           <code>deploy-advisor-extension</code> e
           <code>dashboard-projetos</code>. Você não precisa invocá-las.
+        </p>
+        <p class="mt-3 text-slate-400 text-sm">
+          O <code class="cmd" data-cmd="deploy"></code> é o oposto: só você pode
+          disparar. Publicar em produção não parte do assistente por conta própria.
         </p>
       </section>
 
@@ -253,7 +259,7 @@
             <pre
               class="mt-2 p-3 bg-slate-950 rounded-lg overflow-x-auto text-blue-300 font-mono text-xs"
             >
-/plugin marketplace add victoralecrim/plugin-react-dev-toolkit
+/plugin marketplace add victoralecrim11/plugin-react-dev-toolkit
 /plugin install plugin-react-dev-toolkit@react-dev-marketplace
 /reload-plugins</pre
             >
@@ -285,7 +291,7 @@
       </section>
 
       <p class="mt-8 text-xs text-slate-600">
-        React Dev Hub v1.3.0 · plugin-react-dev-toolkit · MIT
+        React Dev Hub v1.3.1 · plugin-react-dev-toolkit · MIT
       </p>
     </main>
 

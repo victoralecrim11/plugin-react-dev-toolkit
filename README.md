@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.3.0
+# React Dev Hub Plugin — v1.3.1
 
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
@@ -14,7 +14,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.3.0](#react-dev-hub-plugin--v130)
+- [React Dev Hub Plugin — v1.3.1](#react-dev-hub-plugin--v131)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -38,6 +38,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
   - [Estrutura do pacote](#estrutura-do-pacote)
   - [Princípios de mentoria](#princípios-de-mentoria)
   - [Manual](#manual)
+  - [O que mudou na v1.3.1](#o-que-mudou-na-v131)
   - [O que mudou na v1.3.0](#o-que-mudou-na-v130)
   - [Licença](#licença)
 
@@ -67,7 +68,7 @@ Formas alternativas de adicionar o marketplace:
 /plugin marketplace add https://github.com/victoralecrim11/plugin-react-dev-toolkit.git
 
 # fixando uma tag ou branch
-/plugin marketplace add https://github.com/victoralecrim11/plugin-react-dev-toolkit.git#v1.3.0
+/plugin marketplace add https://github.com/victoralecrim11/plugin-react-dev-toolkit.git#v1.3.1
 
 # URL direta do marketplace.json
 /plugin marketplace add https://raw.githubusercontent.com/victoralecrim11/plugin-react-dev-toolkit/main/.claude-plugin/marketplace.json
@@ -165,6 +166,8 @@ Credenciais nunca entram no código. Elas ficam no painel do provedor ou em **Se
 ## Skills que agem sozinhas
 
 Além dos comandos que você digita, o pacote traz seis skills **model-invoked**: o assistente as aciona por conta própria conforme o assunto da conversa, sem você invocar nada.
+
+Todas carregam `user-invocable: false` no frontmatter, então **não aparecem no menu `/`**. São base de conhecimento, não ações — `/react-core` não seria um comando com significado. Esconder do menu evita que elas se misturem aos sete comandos reais.
 
 | Skill | Entra em cena quando |
 | :-- | :-- |
@@ -300,6 +303,11 @@ Em cada review, a análise considera: tipagem, tratamento de erro, estados de ca
 ## Manual
 
 Abra `manual.html` no navegador para uma visão rápida dos sete comandos e do fluxo recomendado. No topo há um alternador **Claude Code / Codex**: ele reescreve todos os comandos da página com ou sem o prefixo do namespace, então o mesmo arquivo serve para os dois ecossistemas. O manual e este README acompanham a versão do plugin e podem ser mantidos junto à sua pasta de projetos.
+
+## O que mudou na v1.3.1
+
+- **Skills fora do menu `/`.** As seis skills de `skills/` ganharam `user-invocable: false`. No Claude Code, todo `SKILL.md` também vira um slash command por padrão, então o plugin expunha 13 entradas no menu — os 7 comandos reais mais as 6 skills. Era o que fazia `/deploy` e `/deploy-advisor-extension` aparecerem lado a lado como se fossem dois comandos de deploy. As skills continuam sendo acionadas pelo modelo normalmente; `user-invocable` só controla a visibilidade no menu.
+- **`/deploy` agora é exclusivo do usuário.** `commands/deploy.md` ganhou `disable-model-invocation: true`. Publicar em produção não é uma decisão que o modelo deva tomar sozinho porque o código "parece pronto". O fluxo guiado continua funcionando: a skill `deploy-advisor-extension` segue model-invoked, então falar de deploy na conversa ainda traz o especialista — o que exige sua ação é o comando que publica.
 
 ## O que mudou na v1.3.0
 

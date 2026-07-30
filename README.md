@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.3.3
+# React Dev Hub Plugin — v1.3.4
 
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 

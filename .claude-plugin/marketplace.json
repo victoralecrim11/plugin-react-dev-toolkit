@@ -1,0 +1,43 @@
+{
+  "name": "react-dev-marketplace",
+  "description": "Marketplace do React Dev Hub: mentoria, arquitetura, code review e deploy para React, Next.js e Expo.",
+  "version": "1.3.0",
+  "owner": {
+    "name": "Victor Alecrim",
+    "url": "https://github.com/victoralecrim11"
+  },
+  "plugins": [
+    {
+      "name": "plugin-react-dev-toolkit",
+      "displayName": "React Dev Hub",
+      "source": "./",
+      "description": "Tech Lead e mentor para projetos React, Next.js e React Native/Expo: discovery de MVP, scaffolding TypeScript, code review didatico, deploy assistido e Project Hub local.",
+      "version": "1.3.0",
+      "author": {
+        "name": "Victor Alecrim",
+        "url": "https://github.com/victoralecrim11/plugin-react-dev-toolkit.git"
+      },
+      "homepage": "https://github.com/victoralecrim11/plugin-react-dev-toolkit#readme",
+      "repository": "https://github.com/victoralecrim11/plugin-react-dev-toolkit",
+      "license": "MIT",
+      "category": "development",
+      "keywords": [
+        "react",
+        "nextjs",
+        "react-native",
+        "expo",
+        "typescript",
+        "code-review",
+        "deploy",
+        "mentoria"
+      ],
+      "tags": ["react", "nextjs", "expo", "typescript", "mentoria"],
+      "skills": ["./skills/"],
+      "commands": ["./commands/"],
+      "strict": true
+    }
+  ],
+  "renames": {
+    "plugin-react-dev": "plugin-react-dev-toolkit"
+  }
+}

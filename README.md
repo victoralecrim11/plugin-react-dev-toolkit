@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.3.1
+# React Dev Hub Plugin — v1.3.2
 
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
@@ -14,7 +14,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.3.1](#react-dev-hub-plugin--v131)
+- [React Dev Hub Plugin — v1.3.2](#react-dev-hub-plugin--v132)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -22,6 +22,9 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
     - [Desenvolvimento local (sem publicar)](#desenvolvimento-local-sem-publicar)
     - [Codex](#codex)
     - [Comandos após a instalação](#comandos-após-a-instalação)
+    - [Atualizar depois de um push](#atualizar-depois-de-um-push)
+      - [Na sua máquina](#na-sua-máquina)
+      - [Deixar o Claude Code atualizar sozinho](#deixar-o-claude-code-atualizar-sozinho)
   - [O ciclo de desenvolvimento](#o-ciclo-de-desenvolvimento)
     - [O fluxo do `/deploy`](#o-fluxo-do-deploy)
   - [Skills que agem sozinhas](#skills-que-agem-sozinhas)
@@ -38,6 +41,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
   - [Estrutura do pacote](#estrutura-do-pacote)
   - [Princípios de mentoria](#princípios-de-mentoria)
   - [Manual](#manual)
+  - [O que mudou na v1.3.2](#o-que-mudou-na-v132)
   - [O que mudou na v1.3.1](#o-que-mudou-na-v131)
   - [O que mudou na v1.3.0](#o-que-mudou-na-v130)
   - [Licença](#licença)
@@ -68,7 +72,7 @@ Formas alternativas de adicionar o marketplace:
 /plugin marketplace add https://github.com/victoralecrim11/plugin-react-dev-toolkit.git
 
 # fixando uma tag ou branch
-/plugin marketplace add https://github.com/victoralecrim11/plugin-react-dev-toolkit.git#v1.3.1
+/plugin marketplace add https://github.com/victoralecrim11/plugin-react-dev-toolkit.git#v1.3.2
 
 # URL direta do marketplace.json
 /plugin marketplace add https://raw.githubusercontent.com/victoralecrim11/plugin-react-dev-toolkit/main/.claude-plugin/marketplace.json
@@ -140,6 +144,52 @@ No Claude Code os comandos de plugin são **namespaced** pelo nome do plugin, pa
 No Codex os mesmos comandos não levam prefixo: `/setup`, `/criar-projeto`, e assim por diante. O `manual.html` tem um alternador que reescreve a página inteira para o contexto que você escolher.
 
 > **Renomeação:** o plugin se chamava `plugin-react-dev` até a v1.2.1. O `marketplace.json` traz um mapa `renames` que migra instalações antigas automaticamente (Claude Code 2.1.193+). Em versões anteriores, remova e reinstale o plugin.
+
+### Atualizar depois de um push
+
+As duas plataformas decidem se há atualização comparando o campo `version` dos manifestos. Por isso o repositório tem um workflow que **bumpa o patch e sincroniza a versão nos quatro lugares** a cada push na `main` — você commita normal, a Action publica.
+
+```
+.github/workflows/bump-version.yml   # bump + validação + tag, no push da main
+scripts/bump-version.py              # sincroniza a versão nos 3 manifestos
+scripts/validate-plugin.py           # checagens de estrutura, roda no CI
+scripts/atualizar-plugin.ps1 / .sh   # atualiza sua máquina nas 2 plataformas
+```
+
+O workflow valida antes de taguear: as checagens próprias, o `claude plugin validate . --strict` oficial, e o `claude plugin tag --dry-run`, que confirma que `plugin.json` e a entrada do marketplace concordam na versão. Se qualquer uma falhar, nada é publicado.
+
+Para pular o bump num commit só de documentação, o workflow já ignora mudanças em `**/*.md`, `manual.html`, `LICENSE`, `.github/**` e `scripts/**`. Para forçar um `minor` ou `major`, use **Actions → Bump da versao do plugin → Run workflow** e escolha a parte.
+
+#### Na sua máquina
+
+```shell
+# Windows
+pwsh scripts/atualizar-plugin.ps1
+
+# macOS / Linux
+./scripts/atualizar-plugin.sh
+```
+
+O script roda o que cada plataforma precisa:
+
+| | Comando | Recarrega sessão aberta? |
+| :-- | :-- | :-- |
+| Claude Code | `claude plugin marketplace update react-dev-marketplace` + `claude plugin update plugin-react-dev-toolkit@react-dev-marketplace` | Não — rode `/reload-plugins` |
+| Codex | `codex plugin marketplace upgrade` | Não — reinicie o app |
+
+Se algo ficar preso numa versão antiga, `--limpar-cache` (ou `-LimparCache`) apaga `~/.claude/plugins/cache` e `~/.codex/plugins/cache` antes de atualizar.
+
+#### Deixar o Claude Code atualizar sozinho
+
+O Claude Code atualiza marketplaces e plugins em background depois que a sessão inicia, mas **vem desligado para marketplaces de terceiros** — precisa ligar uma vez:
+
+1. `/plugin` → aba **Marketplaces**
+2. selecione `react-dev-marketplace`
+3. **Enable auto-update**
+
+A checagem roda com atraso aleatório de até dez minutos após o início da sessão, e a sessão em andamento continua usando o que carregou no launch: quando houver atualização, aparece um aviso para rodar `/reload-plugins`.
+
+No **Codex não existe auto-update documentado** para plugins de marketplace. O caminho é o `codex plugin marketplace upgrade` do script. Se o plugin estiver instalado como `source: local`, a doc é explícita: *"After you change the plugin, update the plugin directory that your marketplace entry points to and restart Codex"*.
 
 ## O ciclo de desenvolvimento
 
@@ -287,6 +337,13 @@ plugin-react-dev-toolkit/            # raiz = plugin E marketplace
 │   ├── react-project-builder/       # Discovery, MVP, implementação e review
 │   ├── deploy-advisor-extension/    # Infraestrutura, CI/CD e publicação
 │   └── dashboard-projetos/          # Project Hub e arquivos de referência
+├── scripts/
+│   ├── bump-version.py              # sincroniza a versão nos 3 manifestos
+│   ├── validate-plugin.py           # checagens de estrutura (roda no CI)
+│   ├── atualizar-plugin.ps1         # atualiza Claude + Codex (Windows)
+│   └── atualizar-plugin.sh          # atualiza Claude + Codex (macOS/Linux)
+├── .github/workflows/
+│   └── bump-version.yml             # bump, validação e tag no push da main
 ├── manual.html                      # Manual visual de consulta rápida
 ├── LICENSE
 └── README.md
@@ -303,6 +360,12 @@ Em cada review, a análise considera: tipagem, tratamento de erro, estados de ca
 ## Manual
 
 Abra `manual.html` no navegador para uma visão rápida dos sete comandos e do fluxo recomendado. No topo há um alternador **Claude Code / Codex**: ele reescreve todos os comandos da página com ou sem o prefixo do namespace, então o mesmo arquivo serve para os dois ecossistemas. O manual e este README acompanham a versão do plugin e podem ser mantidos junto à sua pasta de projetos.
+
+## O que mudou na v1.3.2
+
+- **Publicação automática.** Workflow `bump-version.yml` que, a cada push na `main`, bumpa o patch e sincroniza a versão nos quatro lugares dos três manifestos, valida e cria a tag. É o `version` que faz um commit chegar aos usuários, então sem o bump o push não propagava.
+- **`scripts/validate-plugin.py`** — as checagens de estrutura viraram um script do repo que roda no CI. Cobre o que o validador oficial não vê: coerência entre os manifestos do Claude e do Codex, e o menu de slash commands resultante (pega a regressão de skill aparecendo como comando).
+- **`scripts/atualizar-plugin.ps1` / `.sh`** — atualizam Claude Code e Codex numa tacada, com `--limpar-cache` para quando algo fica preso.
 
 ## O que mudou na v1.3.1
 

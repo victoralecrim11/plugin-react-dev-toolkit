@@ -12,6 +12,7 @@ O fluxo tem frequências distintas: `/setup` roda **uma vez por máquina**, `/cr
 4. `/arquitetura` — define ou ajusta a organização de pastas, estado e responsabilidades sem antecipar complexidade que o projeto ainda não precisa.
 5. `/review` — analisa código existente, preserva comportamento e registra manutenibilidade, riscos e débitos técnicos no Project Hub.
 6. `/dashboard` — reabre o painel local a qualquer momento para consultar projetos, componentes, reviews e checklists arquiteturais.
+7. `/deploy` — **Comando dado SOMENTE após o final do projeto.** Inspeciona silenciosamente a stack do projeto, recomenda o provedor ideal (Vercel, Netlify, Expo EAS, etc.) e guia o processo de publicação com segurança e automação.
 
 ### Perfil persistido
 
@@ -103,7 +104,7 @@ Para fazer backup, copie os dois. Para reiniciar o Project Hub, feche o servidor
 
 ```text
 plugin-react-dev/
-├── .agents/plugins/              # Marketplace padrão do Codex
+├── .agents/plugins/               # Marketplace padrão do Codex
 ├── .codex-plugin/                 # Manifesto do Codex
 ├── .claude-plugin/                # Metadados legados de compatibilidade
 ├── commands/                      # Comandos de fluxo de trabalho
@@ -112,6 +113,7 @@ plugin-react-dev/
 │   ├── nextjs-extension/          # Particularidades do Next.js
 │   ├── react-native-extension/    # Particularidades do Expo/RN
 │   ├── react-project-builder/     # Discovery, MVP, implementação e review
+│   ├── deploy-advisor-extension/  # Especialista em infraestrutura, CI/CD e publicação
 │   └── dashboard-projetos/        # Project Hub e arquivos de referência
 ├── manual.html                    # Manual visual de consulta rápida
 └── README.md

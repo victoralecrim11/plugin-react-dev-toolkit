@@ -376,6 +376,7 @@ Em cada review, a análise considera: tipagem, tratamento de erro, estados de ca
 
 Abra `manual.html` no navegador para uma visão rápida dos sete comandos e do fluxo recomendado. No topo há um alternador **Claude Code / Codex**: ele reescreve todos os comandos da página com ou sem o prefixo do namespace, então o mesmo arquivo serve para os dois ecossistemas. O manual e este README acompanham a versão do plugin e podem ser mantidos junto à sua pasta de projetos.
 
+<a id="o-que-mudou-na-v11312"></a>
 ## O que mudou na v1.3.12
 
 - **Novo comando `/gerar-midia`.** Documentado no README como comando do plugin para gerar imagens hero, previews sociais e vídeos curtos de demonstração usando o MCP da Higgsfield.

@@ -34,6 +34,10 @@ VERSION_RE = re.compile(r'("version"\s*:\s*")(\d+\.\d+\.\d+)(")')
 MANUAL = "manual.html"
 MANUAL_RE = re.compile(r'(v)(\d+\.\d+\.\d+)')
 
+README = "README.md"
+README_RE = re.compile(r'^(# React Dev Hub Plugin — v)(\d+\.\d+\.\d+)\s*$', re.MULTILINE)
+TOTAIS = sum(TARGETS.values()) + 2
+
 
 def read_current():
     p = ROOT / ".claude-plugin/plugin.json"
@@ -116,6 +120,22 @@ def main():
                           encoding="utf-8", newline=nl)
             written.append(f"  {MANUAL}: {found} ocorrencia(s) -> {new}")
 
+    rr = ROOT / README
+    if not rr.exists():
+        problems.append(f"{README}: nao encontrado")
+    else:
+        rt = rr.read_text(encoding="utf-8")
+        found = len(README_RE.findall(rt))
+        if found == 0:
+            problems.append(f"{README}: nenhuma cabecalho de versao encontrada")
+        elif args.check:
+            written.append(f"  {README}: {found} ocorrencia(s) ok")
+        else:
+            nl = "\r\n" if "\r\n" in rt else "\n"
+            rr.write_text(README_RE.sub(lambda m: m.group(1) + new, rt),
+                          encoding="utf-8", newline=nl)
+            written.append(f"  {README}: {found} ocorrencia(s) -> {new}")
+
     if problems:
         print("FALHOU:", file=sys.stderr)
         for p in problems:
@@ -131,9 +151,11 @@ def main():
                 seen.add(m.group(2))
         for m in MANUAL_RE.finditer((ROOT / MANUAL).read_text(encoding="utf-8")):
             seen.add(m.group(2))
+        for m in README_RE.finditer((ROOT / README).read_text(encoding="utf-8")):
+            seen.add(m.group(2))
         if seen != {new}:
             sys.exit(f"erro: versoes divergentes apos o bump: {sorted(seen)}")
-        print(f"\nversao sincronizada em {sum(TARGETS.values())} lugares: {new}")
+        print(f"\nversao sincronizada em {TOTAIS} lugares: {new}")
         print(f"::set-version::{new}")
 
 

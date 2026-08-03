@@ -1,6 +1,6 @@
 {
   "name": "plugin-react-dev-toolkit",
-  "version": "1.3.9",
+  "version": "1.3.10",
   "description": "Mentoria e construcao de projetos React, Next.js e React Native/Expo com deploy assistido e dashboard local de projetos.",
   "author": { "name": "Victor Alecrim" },
   "homepage": "https://github.com/victoralecrim11/plugin-react-dev-toolkit#readme",

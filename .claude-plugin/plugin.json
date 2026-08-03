@@ -2,7 +2,7 @@
   "name": "plugin-react-dev-toolkit",
   "displayName": "React Dev Hub",
   "description": "Tech Lead e mentor para projetos React, Next.js e React Native/Expo: discovery de MVP, scaffolding TypeScript, code review didatico, deploy assistido e Project Hub local.",
-  "version": "1.3.11",
+  "version": "1.3.12",
   "author": {
     "name": "Victor Alecrim",
     "url": "https://github.com/victoralecrim11"

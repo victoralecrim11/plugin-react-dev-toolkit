@@ -13,7 +13,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.3.11](#react-dev-hub-plugin--v11311)
+- [React Dev Hub Plugin — v1.3.12](#react-dev-hub-plugin--v11312)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -40,6 +40,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
   - [Estrutura do pacote](#estrutura-do-pacote)
   - [Princípios de mentoria](#princípios-de-mentoria)
   - [Manual](#manual)
+  - [O que mudou na v1.3.12](#o-que-mudou-na-v11312)
   - [O que mudou na v1.3.2](#o-que-mudou-na-v132)
   - [O que mudou na v1.3.1](#o-que-mudou-na-v131)
   - [O que mudou na v1.3.0](#o-que-mudou-na-v130)
@@ -374,6 +375,12 @@ Em cada review, a análise considera: tipagem, tratamento de erro, estados de ca
 ## Manual
 
 Abra `manual.html` no navegador para uma visão rápida dos sete comandos e do fluxo recomendado. No topo há um alternador **Claude Code / Codex**: ele reescreve todos os comandos da página com ou sem o prefixo do namespace, então o mesmo arquivo serve para os dois ecossistemas. O manual e este README acompanham a versão do plugin e podem ser mantidos junto à sua pasta de projetos.
+
+## O que mudou na v1.3.12
+
+- **Novo comando `/gerar-midia`.** Documentado no README como comando do plugin para gerar imagens hero, previews sociais e vídeos curtos de demonstração usando o MCP da Higgsfield.
+- **README atualizado.** Inclui a seção de instalação do Codex CLI e deixa claro que o Codex usa marketplace separado do Claude Code.
+- **Sincronização de versão estendida.** `scripts/bump-version.py` agora atualiza também `README.md` e `manual.html`, e o workflow de bump comita esses arquivos junto com os manifestos.
 
 ## O que mudou na v1.3.2
 

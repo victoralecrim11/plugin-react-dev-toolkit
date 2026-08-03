@@ -19,5 +19,15 @@
     "code-review",
     "deploy",
     "mentoria"
-  ]
+  ],
+
+  "userConfig": {
+    "higgsfield_api_key": {
+      "type": "string",
+      "title": "Higgsfield API Key",
+      "description": "Sua chave da Higgsfield (higgsfield.ai/settings/api)",
+      "sensitive": true,
+      "required": true
+    }
+  }
 }

@@ -1,7 +1,7 @@
 # React Dev Hub Plugin — v1.3.12
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
-Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar, publicar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto.
+Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar, publicar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto. Inclui o novo comando `/gerar-midia` para criar imagens hero, previews sociais e vídeos curtos de demonstração via MCP da Higgsfield.
 
 ```shell
 /plugin marketplace add victoralecrim11/plugin-react-dev-toolkit
@@ -13,7 +13,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.3.5](#react-dev-hub-plugin--v135)
+- [React Dev Hub Plugin — v1.3.11](#react-dev-hub-plugin--v11311)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -126,6 +126,17 @@ Se algo não carregar, abra `/plugin` e veja a aba **Errors**.
 
 O marketplace padrão do Codex fica em `.agents/plugins/marketplace.json` e usa `source: "url"` apontando para o repositório GitHub da raiz do plugin. Esse formato é o recomendado para plugins hospedados em Git, porque o Codex faz o clone e precisa resolver a origem a partir do repositório remoto. Para desenvolvimento local, use o exemplo em `examples/codex-marketplace-local.json` e ajuste o `path` para a pasta onde clonou o repositório. Em repositórios privados, o Git usado pelo Codex precisa ter credenciais de leitura para a sua conta.
 
+#### Codex CLI
+
+A instalação do plugin no Codex CLI não usa os mesmos comandos `/plugin` do Claude Code. Use o marketplace do Codex para registrar este repositório e instalar ou atualizar o plugin a partir dele.
+
+```shell
+codex plugin marketplace add https://raw.githubusercontent.com/victoralecrim11/plugin-react-dev-toolkit/main/.codex-plugin/marketplace.json
+codex plugin marketplace upgrade
+```
+
+Se você já tiver o marketplace configurado, basta rodar `codex plugin marketplace upgrade` e reiniciar o app. O `codex plugin marketplace add` registra o marketplace; a instalação efetiva do plugin ocorre via marketplace e o app carrega os comandos a partir dele.
+
 ### Comandos após a instalação
 
 No Claude Code os comandos de plugin são **namespaced** pelo nome do plugin, para evitar conflito entre plugins:
@@ -138,6 +149,7 @@ No Claude Code os comandos de plugin são **namespaced** pelo nome do plugin, pa
 | `/plugin-react-dev-toolkit:arquitetura` | organização de pastas, estado e responsabilidades | recorrente |
 | `/plugin-react-dev-toolkit:review` | code review didático | recorrente |
 | `/plugin-react-dev-toolkit:deploy` | análise da stack, build e publicação | fim de ciclo |
+| `/plugin-react-dev-toolkit:gerar-midia` | gera imagem hero, OG image ou vídeo curto com MCP da Higgsfield | opção criativa |
 | `/plugin-react-dev-toolkit:dashboard` | reabre o Project Hub | recorrente |
 
 No Codex os mesmos comandos não levam prefixo: `/setup`, `/criar-projeto`, e assim por diante. O `manual.html` tem um alternador que reescreve a página inteira para o contexto que você escolher.

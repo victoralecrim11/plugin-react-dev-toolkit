@@ -317,9 +317,9 @@ O painel em `http://127.0.0.1:8766` permite:
 
 O caminho recomendado é rodar `/setup`: ele copia os arquivos, sobe o servidor e abre o painel para você. Se preferir fazer à mão:
 
-1. Copie os arquivos de `skills/dashboard-projetos/references/` para a pasta onde deseja manter os dados do Project Hub.
-2. No Windows, dê duplo clique em `iniciar-dashboard.bat`.
-3. No macOS/Linux, execute `chmod +x iniciar-dashboard.command` uma vez e depois `./iniciar-dashboard.command`.
+1. Copie os arquivos de `skills/react-dev/references/project-hub/` para uma subpasta `ProjectHUB` dentro da pasta onde deseja manter os dados do Project Hub.
+2. No Windows, dê duplo clique em `ProjectHUB\iniciar-dashboard.bat`.
+3. No macOS/Linux, execute `chmod +x ProjectHUB/iniciar-dashboard.command` uma vez e depois `./ProjectHUB/iniciar-dashboard.command`.
 4. O navegador abre automaticamente em `http://127.0.0.1:8766`.
 
 Depois disso, `/dashboard` reabre o painel a qualquer momento.

@@ -18,7 +18,7 @@ Antes de perguntar qualquer coisa, procure um `dashboard-config.json` existente:
 1. Mostre o perfil atual em uma lista curta (`devLevel`, `projectsRoot`, `defaultPlatform`, `defaultGoal`).
 2. Pergunte **o que o usuário quer alterar**. Não repita o onboarding inteiro e não repergunte campos que ele não mencionou.
 3. Grave apenas os campos alterados via `POST /api/config` (ver Etapa 3).
-4. **Pule a Etapa 2 inteira.** Os arquivos já estão instalados. A única exceção é se o usuário mudou `projectsRoot`: nesse caso copie os arquivos para a nova pasta, mova `projetos-data.json` e `dashboard-config.json` junto, e reinicie o servidor lá.
+4. **Pule a Etapa 2 inteira.** Os arquivos já estão instalados. A única exceção é se o usuário mudou `projectsRoot`: nesse caso mova a subpasta `ProjectHUB` (com `dashboard-server.py`, `dashboard-template.html`, `iniciar-dashboard.*`, `dashboard-config.json` e `projetos-data.json`) para a nova pasta-base e reinicie o servidor lá.
 5. Confirme o que mudou e encerre. Não rode scan nem reapresente o manual sem que o usuário peça.
 
 Se o usuário alterar o `devLevel`, avise que isso muda o teto de complexidade arquitetural dos próximos comandos, mas **não** reescreve projetos já criados.
@@ -38,14 +38,14 @@ Explique que TypeScript estrito é obrigatório e não é configurável.
 
 Apenas no **modo instalação**. Vem antes da gravação do perfil: sem os arquivos copiados não existe `dashboard-config.json` nem servidor para receber o `POST`.
 
-1. Copie `${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/project-hub/dashboard-server.py`, `dashboard-template.html` e o inicializador do sistema operacional para a pasta-base escolhida.
+1. Crie a subpasta `ProjectHUB` dentro da pasta-base escolhida e copie `${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/project-hub/dashboard-server.py`, `dashboard-template.html` e o inicializador do sistema operacional para essa subpasta.
 
    > `${CLAUDE_PLUGIN_ROOT}` e a raiz do plugin instalado. Use sempre essa variavel: quando o plugin e instalado por um marketplace, os arquivos ficam em um cache (`~/.claude/plugins/cache/...`) e caminhos relativos ao projeto do usuario nao resolvem.
-2. Escreva `dashboard-config.json` na pasta-base, ao lado de `dashboard-server.py`, com os campos do perfil (ver Etapa 3).
+2. Escreva `dashboard-config.json` na subpasta `ProjectHUB`, ao lado de `dashboard-server.py`, com os campos do perfil (ver Etapa 3).
 
    > **Nunca sobrescreva um `dashboard-config.json` que já existe.** O arquivo também guarda `githubUsername` e `githubToken`, que não pertencem ao perfil e seriam perdidos. Se o arquivo existir, você está em modo reconfiguração: volte à Etapa 0 e use `POST /api/config`, que faz merge parcial.
 
-3. Suba o Project Hub: `iniciar-dashboard.bat` no Windows, `./iniciar-dashboard.command` no macOS/Linux. O painel abre em `http://127.0.0.1:8766`.
+3. Suba o Project Hub a partir da subpasta `ProjectHUB`: execute `ProjectHUB\iniciar-dashboard.bat` no Windows ou `./ProjectHUB/iniciar-dashboard.command` no macOS/Linux. O painel abre em `http://127.0.0.1:8766`.
 
 ## Etapa 3 — Persistência do perfil
 

@@ -1,7 +1,7 @@
 {
   "name": "react-dev-marketplace",
   "description": "Marketplace do React Dev Hub: mentoria, arquitetura, code review e deploy para React, Next.js e Expo.",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "owner": {
     "name": "Victor Alecrim",
     "url": "https://github.com/victoralecrim11"
@@ -12,7 +12,7 @@
       "displayName": "React Dev Hub",
       "source": "./",
       "description": "Tech Lead e mentor para projetos React, Next.js e React Native/Expo: discovery de MVP, scaffolding TypeScript, code review didatico, deploy assistido e Project Hub local.",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "author": {
         "name": "Victor Alecrim",
         "url": "https://github.com/victoralecrim11"

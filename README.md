@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.5.0
+# React Dev Hub Plugin — v1.5.1
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
 Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar, publicar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto. Inclui o comando `/gerar-midia` para criar imagens hero, previews sociais e vídeos curtos via MCP da Higgsfield, o `/analisar-projeto-gsd`, que analisa projetos construídos com o **framework GSD** cruzando os artefatos da pasta `.planning/` com o código real, e o `/auditar-seguranca`, uma auditoria de segurança que caça as brechas típicas de "vibe coding" antes que virem problema.

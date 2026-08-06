@@ -15,6 +15,7 @@ import argparse
 import io
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -36,6 +37,9 @@ MANUAL_RE = re.compile(r'(v)(\d+\.\d+\.\d+)')
 
 README = "README.md"
 README_RE = re.compile(r'^(# React Dev Hub Plugin — v)(\d+\.\d+\.\d+)\s*$', re.MULTILINE)
+README_TOP_LINK_RE = re.compile(r'^(\s*- \[React Dev Hub Plugin — v)(\d+\.\d+\.\d+)(\]\(#react-dev-hub-plugin--v)(\d+\.\d+\.\d+)(\))\s*$', re.MULTILINE)
+README_LINK_ITEM_RE = re.compile(r'^\s*- \[O que mudou na v\d+\.\d+\.\d+\]\(#o-que-mudou-na-v\d+\.\d+\.\d+\)\s*$', re.MULTILINE)
+README_SECTION_HEADING_RE = re.compile(r'^## O que mudou na v\d+\.\d+\.\d+\s*$', re.MULTILINE)
 TOTAIS = sum(TARGETS.values()) + 2
 
 
@@ -45,6 +49,18 @@ def read_current():
     if not v:
         sys.exit("erro: .claude-plugin/plugin.json nao tem campo version")
     return v
+
+
+def git_last_commit_subject():
+    try:
+        return subprocess.check_output(
+            ["git", "log", "-1", "--pretty=%s"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return ""
 
 
 def bump(v, part):
@@ -132,8 +148,38 @@ def main():
             written.append(f"  {README}: {found} ocorrencia(s) ok")
         else:
             nl = "\r\n" if "\r\n" in rt else "\n"
-            rr.write_text(README_RE.sub(lambda m: m.group(1) + new, rt),
-                          encoding="utf-8", newline=nl)
+            newrt = README_RE.sub(lambda m: m.group(1) + new, rt)
+            newrt = README_TOP_LINK_RE.sub(
+                lambda m: m.group(1) + new + m.group(3) + new + m.group(5) + m.group(6),
+                newrt,
+            )
+            if f"[O que mudou na v{new}]" not in newrt:
+                first_link = README_LINK_ITEM_RE.search(newrt)
+                if first_link:
+                    newrt = (newrt[:first_link.start()] +
+                             f"- [O que mudou na v{new}](#o-que-mudou-na-v{new})\n" +
+                             newrt[first_link.start():])
+            if f"## O que mudou na v{new}" not in newrt:
+                commit_subject = git_last_commit_subject()
+                summary_line = (f"- **Commit:** {commit_subject}"
+                                if commit_subject else
+                                f"- **Bump:** versão atualizada para v{new}.")
+                section_content = (
+                    f"<a id=\"o-que-mudou-na-v{new}\"></a>\n"
+                    f"## O que mudou na v{new}\n\n"
+                    f"{summary_line}\n"
+                    f"- **Automação de changelog.** `scripts/bump-version.py` agora cria esta seção automaticamente no `README.md` durante o bump de versão.\n\n"
+                )
+                first_section = README_SECTION_HEADING_RE.search(newrt)
+                if first_section:
+                    newrt = newrt[:first_section.start()] + section_content + newrt[first_section.start():]
+                else:
+                    license_anchor = re.search(r'^## Licença', newrt, re.MULTILINE)
+                    if license_anchor:
+                        newrt = newrt[:license_anchor.start()] + section_content + newrt[license_anchor.start():]
+                    else:
+                        newrt += f"\n{section_content}"
+            rr.write_text(newrt, encoding="utf-8", newline=nl)
             written.append(f"  {README}: {found} ocorrencia(s) -> {new}")
 
     if problems:

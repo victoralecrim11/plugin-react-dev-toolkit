@@ -13,7 +13,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.5.0](#react-dev-hub-plugin--v150)
+- [React Dev Hub Plugin — v1.5.1](#react-dev-hub-plugin--v151)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -40,6 +40,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
   - [Estrutura do pacote](#estrutura-do-pacote)
   - [Princípios de mentoria](#princípios-de-mentoria)
   - [Manual](#manual)
+  - [O que mudou na v1.5.1](#o-que-mudou-na-v151)
   - [O que mudou na v1.5.0](#o-que-mudou-na-v150)
   - [O que mudou na v1.4.0](#o-que-mudou-na-v140)
   - [O que mudou na v1.3.12](#o-que-mudou-na-v11312)
@@ -381,6 +382,12 @@ Em cada review, a análise considera: tipagem, tratamento de erro, estados de ca
 ## Manual
 
 Abra `manual.html` no navegador para uma visão rápida dos sete comandos e do fluxo recomendado. No topo há um alternador **Claude Code / Codex**: ele reescreve todos os comandos da página com ou sem o prefixo do namespace, então o mesmo arquivo serve para os dois ecossistemas. O manual e este README acompanham a versão do plugin e podem ser mantidos junto à sua pasta de projetos.
+
+<a id="o-que-mudou-na-v151"></a>
+## O que mudou na v1.5.1
+
+- **Release v1.5.1.** Commit `chore(release): v1.5.1`.
+- **Automação de changelog.** `scripts/bump-version.py` agora insere automaticamente esta seção `O que mudou na vX.Y.Z` no `README.md` sempre que a versão do plugin é bumpada.
 
 <a id="o-que-mudou-na-v150"></a>
 ## O que mudou na v1.5.0

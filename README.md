@@ -1,7 +1,7 @@
-# React Dev Hub Plugin — v1.3.12
+# React Dev Hub Plugin — v1.5.0
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
-Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar, publicar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto. Inclui o novo comando `/gerar-midia` para criar imagens hero, previews sociais e vídeos curtos de demonstração via MCP da Higgsfield.
+Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar, publicar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto. Inclui o comando `/gerar-midia` para criar imagens hero, previews sociais e vídeos curtos via MCP da Higgsfield, o `/analisar-projeto-gsd`, que analisa projetos construídos com o **framework GSD** cruzando os artefatos da pasta `.planning/` com o código real, e o `/auditar-seguranca`, uma auditoria de segurança que caça as brechas típicas de "vibe coding" antes que virem problema.
 
 ```shell
 /plugin marketplace add victoralecrim11/plugin-react-dev-toolkit
@@ -13,7 +13,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.3.12](#react-dev-hub-plugin--v11312)
+- [React Dev Hub Plugin — v1.5.0](#react-dev-hub-plugin--v150)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -40,6 +40,8 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
   - [Estrutura do pacote](#estrutura-do-pacote)
   - [Princípios de mentoria](#princípios-de-mentoria)
   - [Manual](#manual)
+  - [O que mudou na v1.5.0](#o-que-mudou-na-v150)
+  - [O que mudou na v1.4.0](#o-que-mudou-na-v140)
   - [O que mudou na v1.3.12](#o-que-mudou-na-v11312)
   - [O que mudou na v1.3.2](#o-que-mudou-na-v132)
   - [O que mudou na v1.3.1](#o-que-mudou-na-v131)
@@ -149,6 +151,8 @@ No Claude Code os comandos de plugin são **namespaced** pelo nome do plugin, pa
 | `/plugin-react-dev-toolkit:criar-componente` | componentes, hooks e testes | recorrente |
 | `/plugin-react-dev-toolkit:arquitetura` | organização de pastas, estado e responsabilidades | recorrente |
 | `/plugin-react-dev-toolkit:review` | code review didático | recorrente |
+| `/plugin-react-dev-toolkit:auditar-seguranca` | auditoria de segurança: segredos, deps, XSS, injeção, auth | recorrente |
+| `/plugin-react-dev-toolkit:analisar-projeto-gsd` | analisa um projeto feito com o framework GSD (spec `.planning/` vs código) | recorrente |
 | `/plugin-react-dev-toolkit:deploy` | análise da stack, build e publicação | fim de ciclo |
 | `/plugin-react-dev-toolkit:gerar-midia` | gera imagem hero, OG image ou vídeo curto com MCP da Higgsfield | opção criativa |
 | `/plugin-react-dev-toolkit:dashboard` | reabre o Project Hub | recorrente |
@@ -213,9 +217,11 @@ O fluxo tem frequências distintas: `/setup` roda **uma vez por máquina**, `/cr
 2. `/criar-projeto` — **uma vez por projeto.** Lê o perfil salvo pelo `/setup` e pergunta apenas o que é específico do projeto: nome, plataforma, objetivo e escopo. Transforma a ideia em scaffold TypeScript com estrutura de pastas, arquivos fundamentais e próximos passos.
 3. `/criar-componente` — produz componentes e hooks reutilizáveis, pequenos, acessíveis e tipados. Itens com potencial de reuso podem ser adicionados ao catálogo do dashboard.
 4. `/arquitetura` — define ou ajusta a organização de pastas, estado e responsabilidades sem antecipar complexidade que o projeto ainda não precisa.
-5. `/review` — analisa código existente, preserva comportamento e registra manutenibilidade, riscos e débitos técnicos no Project Hub.
-6. `/dashboard` — reabre o painel local a qualquer momento para consultar projetos, componentes, reviews e checklists arquiteturais.
-7. `/deploy` — **Comando dado SOMENTE após o final do projeto.** Inspeciona silenciosamente a stack do projeto, recomenda o provedor ideal e guia o processo de publicação com segurança e automação.
+5. `/review` — analisa código existente, preserva comportamento e registra manutenibilidade, riscos e débitos técnicos no Project Hub. Inclui uma passada de segurança em todo review.
+6. `/auditar-seguranca` — auditoria de segurança dedicada e mais profunda que a passada do `/review`. Procura brechas exploráveis — segredos vazados no bundle do cliente, dependências vulneráveis, XSS, injeção, autenticação/autorização frágil e exposição de dados — classifica cada achado por severidade (Crítico/Alto/Médio/Baixo) e, com sua aprovação, corrige preservando comportamento. É o antídoto direto para as brechas típicas de "vibe coding". Registra a postura de segurança no Project Hub.
+7. `/analisar-projeto-gsd` — para projetos construídos com o **framework GSD**: lê os artefatos da pasta `.planning/` (visão, requisitos, roadmap e planos das fases) e cruza com o código React/Next/Expo real. Separa os achados em **deriva de spec** (o que o GSD documentou e o código não cumpre) e **qualidade técnica**, e — com sua aprovação — corrige o que fugiu da spec, preservando comportamento. Registra a análise no Project Hub.
+8. `/dashboard` — reabre o painel local a qualquer momento para consultar projetos, componentes, reviews e checklists arquiteturais.
+9. `/deploy` — **Comando dado SOMENTE após o final do projeto.** Inspeciona silenciosamente a stack do projeto, recomenda o provedor ideal e guia o processo de publicação com segurança e automação.
 
 ### O fluxo do `/deploy`
 
@@ -375,6 +381,19 @@ Em cada review, a análise considera: tipagem, tratamento de erro, estados de ca
 ## Manual
 
 Abra `manual.html` no navegador para uma visão rápida dos sete comandos e do fluxo recomendado. No topo há um alternador **Claude Code / Codex**: ele reescreve todos os comandos da página com ou sem o prefixo do namespace, então o mesmo arquivo serve para os dois ecossistemas. O manual e este README acompanham a versão do plugin e podem ser mantidos junto à sua pasta de projetos.
+
+<a id="o-que-mudou-na-v150"></a>
+## O que mudou na v1.5.0
+
+- **Novo comando `/auditar-seguranca`.** Auditoria de segurança dedicada para React/Next/Expo, o antídoto para as brechas típicas de "vibe coding". Procura segredos vazados no bundle do cliente, dependências vulneráveis (`npm audit`), XSS, injeção, autenticação/autorização frágil e exposição de dados; classifica por severidade (Crítico/Alto/Médio/Baixo) e corrige com aprovação, preservando comportamento. Ao achar um segredo já commitado, orienta a **revogar e rotacionar** a credencial — não só apagar do arquivo. Calibrado por `devLevel` e registrado no Project Hub como índice de postura de segurança.
+- **Nova referência `references/security-review.md`.** Modelo de ameaças e checklist de segurança completo (segredos, deps, XSS, injeção, auth, Server Actions/route handlers do Next, especificidades de Expo, exposição de dados e transporte). Entra na tabela do `SKILL.md`.
+- **`/review` com passada de segurança embutida.** O code review de rotina agora sempre inclui uma checagem de segurança de primeira linha e aponta para `/auditar-seguranca` quando o caso pede profundidade. As dimensões de performance e casos de borda também foram detalhadas.
+
+<a id="o-que-mudou-na-v140"></a>
+## O que mudou na v1.4.0
+
+- **Novo comando `/analisar-projeto-gsd`.** Analisa projetos construídos com o **framework GSD** (Get Stuff Done). Detecta a pasta `.planning/`, lê os artefatos de especificação (`PROJECT.md`, `REQUIREMENTS.md`, `ROADMAP.md`, `STATE.md` e os `PLAN.md`/`SUMMARY.md` de cada fase) e cruza a intenção documentada com o código React/Next/Expo real. Separa os achados em **deriva de spec** e **qualidade técnica**, corrige divergências mediante aprovação (preservando comportamento) e registra tudo no Project Hub. Calibrado pelo `devLevel`, como os demais comandos.
+- **Nova referência `references/gsd-analyzer.md`.** Documenta o mapa completo dos artefatos do GSD e a metodologia de análise; entra na tabela do `SKILL.md` e é resolvida por `${CLAUDE_PLUGIN_ROOT}`.
 
 <a id="o-que-mudou-na-v11312"></a>
 ## O que mudou na v1.3.12

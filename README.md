@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.5.1
+# React Dev Hub Plugin — v1.5.2
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
 Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar, publicar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto. Inclui o comando `/gerar-midia` para criar imagens hero, previews sociais e vídeos curtos via MCP da Higgsfield, o `/analisar-projeto-gsd`, que analisa projetos construídos com o **framework GSD** cruzando os artefatos da pasta `.planning/` com o código real, e o `/auditar-seguranca`, uma auditoria de segurança que caça as brechas típicas de "vibe coding" antes que virem problema.
@@ -385,6 +385,12 @@ Em cada review, a análise considera: tipagem, tratamento de erro, estados de ca
 Abra `manual.html` no navegador para uma visão rápida dos sete comandos e do fluxo recomendado. No topo há um alternador **Claude Code / Codex**: ele reescreve todos os comandos da página com ou sem o prefixo do namespace, então o mesmo arquivo serve para os dois ecossistemas. O manual e este README acompanham a versão do plugin e podem ser mantidos junto à sua pasta de projetos.
 
 <a id="o-que-mudou-na-v151"></a>
+<a id="o-que-mudou-na-v1.5.2"></a>
+## O que mudou na v1.5.2
+
+- **Commit:** correção de script workflow bump-version.yml
+- **Automação de changelog.** `scripts/bump-version.py` agora cria esta seção automaticamente no `README.md` durante o bump de versão.
+
 ## O que mudou na v1.5.1
 
 - **Release v1.5.1.** Commit `chore(release): v1.5.1`.

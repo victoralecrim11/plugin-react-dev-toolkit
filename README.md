@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.5.3
+# React Dev Hub Plugin — v1.5.4
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
 Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar, publicar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto. Inclui o comando `/gerar-midia` para criar imagens hero, previews sociais e vídeos curtos via MCP da Higgsfield, o `/analisar-projeto-gsd`, que analisa projetos construídos com o **framework GSD** cruzando os artefatos da pasta `.planning/` com o código real, e o `/auditar-seguranca`, uma auditoria de segurança que caça as brechas típicas de "vibe coding" antes que virem problema.
@@ -13,7 +13,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.5.3](#react-dev-hub-plugin--v153)
+- [React Dev Hub Plugin — v1.5.4](#react-dev-hub-plugin--v154)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -387,6 +387,12 @@ Abra `manual.html` no navegador para uma visão rápida dos sete comandos e do f
 <a id="o-que-mudou-na-v151"></a>
 <a id="o-que-mudou-na-v1.5.2"></a>
 <a id="o-que-mudou-na-v1.5.3"></a>
+<a id="o-que-mudou-na-v1.5.4"></a>
+## O que mudou na v1.5.4
+
+- **Commit:** fix: corrigir atualizacao automatica do README no bump
+- **Automação de changelog.** `scripts/bump-version.py` agora cria esta seção automaticamente no `README.md` durante o bump de versão.
+
 ## O que mudou na v1.5.3
 
 - **Commit:** fix: corrigir workflow de bump automatico

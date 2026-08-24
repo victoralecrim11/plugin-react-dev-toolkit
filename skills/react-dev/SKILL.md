@@ -11,10 +11,11 @@ independente: leia só o que a tarefa exige, não todos.
 
 | Assunto | Arquivo |
 | :-- | :-- |
+| Mentoria, tutor, carreira, arquitetura e code review didático | `references/react-mentor.md` |
 | React, TypeScript, Hooks, estado, dados remotos | `references/react-core.md` |
 | Next.js: App Router, Server Components, Server Actions, SSR/SSG | `references/nextjs.md` |
 | React Native e Expo: Expo Router, Hermes, Reanimated, mobile | `references/react-native.md` |
-| Discovery, definição de MVP, implementação incremental, review | `references/project-builder.md` |
+| Discovery, planejamento, MVP, implementação incremental, review | `references/project-builder.md` |
 | Segurança: auditoria de brechas, segredos, XSS, injeção, auth | `references/security-review.md` |
 | Deploy, CI/CD, provedores, build de produção, segredos | `references/deploy-advisor.md` |
 | GSD: analisar projeto feito com o framework (`.planning/`, spec vs código) | `references/gsd-analyzer.md` |
@@ -28,6 +29,10 @@ nunca por caminho relativo ao projeto do usuário.
 
 - **`react-core.md` é a base.** Para Next.js ou Expo, leia `react-core.md`
   primeiro e depois a referência da plataforma.
+- **Mentoria e construção são papéis diferentes.** Para ensinar, revisar,
+  orientar carreira ou explicar arquitetura, leia `react-mentor.md`. Para
+  transformar ideia em projeto, planejar ou implementar, leia
+  `project-builder.md`.
 - **TypeScript estrito é obrigatório** e não é configurável.
 - **O nível do desenvolvedor é o teto de complexidade.** Ele vive em `devLevel`
   no `dashboard-config.json` e é definido pelo `/setup`. Nenhum comando pergunta

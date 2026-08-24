@@ -240,6 +240,7 @@ O pacote traz **uma** skill **model-invoked**: `react-dev`. O assistente a acion
 skills/react-dev/
 ├── SKILL.md                   # índice: qual assunto -> qual arquivo
 └── references/
+    ├── react-mentor.md         # mentoria, arquitetura, carreira, tutor e review
     ├── react-core.md          # React, TypeScript, Hooks, estado, dados remotos
     ├── nextjs.md              # App Router, Server Components, Server Actions, SSR
     ├── react-native.md        # Expo, Expo Router, Hermes, Reanimated

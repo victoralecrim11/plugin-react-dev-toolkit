@@ -38,7 +38,7 @@ MANUAL_RE = re.compile(r'(v)(\d+\.\d+\.\d+)')
 README = "README.md"
 README_RE = re.compile(r'^(# React Dev Hub Plugin — v)(\d+\.\d+\.\d+)\s*$', re.MULTILINE)
 README_TOP_LINK_RE = re.compile(r'^(\s*- \[React Dev Hub Plugin — v)(\d+\.\d+\.\d+)(\]\(#react-dev-hub-plugin--v)(\d+)(\))\s*$', re.MULTILINE)
-README_LINK_ITEM_RE = re.compile(r'^\s*- \[O que mudou na v\d+\.\d+\.\d+\]\(#o-que-mudou-na-v\d+\.\d+\.\d+\)\s*$', re.MULTILINE)
+README_LINK_ITEM_RE = re.compile(r'^\s*- \[O que mudou na v\d+\.\d+\.\d+\]\(#o-que-mudou-na-v\d+\)\s*$', re.MULTILINE)
 README_SECTION_HEADING_RE = re.compile(r'^## O que mudou na v\d+\.\d+\.\d+\s*$', re.MULTILINE)
 TOTAIS = sum(TARGETS.values()) + 2
 

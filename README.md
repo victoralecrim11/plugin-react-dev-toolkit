@@ -13,7 +13,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.5.1](#react-dev-hub-plugin--v151)
+- [React Dev Hub Plugin — v1.5.3](#react-dev-hub-plugin--v153)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)

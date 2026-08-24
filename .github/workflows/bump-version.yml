@@ -9,12 +9,13 @@ name: Bump da versao do plugin
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "README.md"
-      - "manual.html"
-      - "LICENSE"
-      - ".github/**"
-      - "scripts/**"
+    paths:
+      - ".agents/**"
+      - ".claude-plugin/**"
+      - ".codex-plugin/**"
+      - "commands/**"
+      - "skills/**"
+      - ".mcp.json"
   workflow_dispatch:
     inputs:
       part:

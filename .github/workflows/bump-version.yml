@@ -84,12 +84,22 @@ jobs:
             if [[ -z "$PREVIOUS_VERSION" || "$PREVIOUS_VERSION" != "$CURRENT_VERSION" ]]; then
               VERSION="$CURRENT_VERSION"
               echo "explicit_version_change=YES" >> "$GITHUB_OUTPUT"
+              echo "release_recovery=NO" >> "$GITHUB_OUTPUT"
+              echo "auto_bump=NO" >> "$GITHUB_OUTPUT"
+            elif ! git ls-remote --exit-code --tags origin "refs/tags/v$CURRENT_VERSION" >/dev/null 2>&1; then
+              # Recovery: a release commit com esta versao chegou a main, mas a tag
+              # ainda nao existe (por exemplo, validacao/tag falhou no workflow anterior).
+              # Preserve a versao atual para permitir retry sem pular um patch.
+              VERSION="$CURRENT_VERSION"
+              echo "explicit_version_change=YES" >> "$GITHUB_OUTPUT"
+              echo "release_recovery=YES" >> "$GITHUB_OUTPUT"
               echo "auto_bump=NO" >> "$GITHUB_OUTPUT"
             else
               python3 scripts/bump-version.py --patch | tee bump.log
               VERSION=$(python3 -c 'import re; print(re.search(r"::set-version::([^\\s]+)", open("bump.log", encoding="utf-8").read()).group(1))')
               rm bump.log
               echo "explicit_version_change=NO" >> "$GITHUB_OUTPUT"
+              echo "release_recovery=NO" >> "$GITHUB_OUTPUT"
               echo "auto_bump=YES" >> "$GITHUB_OUTPUT"
             fi
 

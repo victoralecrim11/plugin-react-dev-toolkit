@@ -19,6 +19,20 @@ Pergunte apenas o que é específico deste projeto:
 
 Para uma ideia vaga, use `${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/project-builder.md` em modo Discovery: defina público, objetivo, MVP, premissas e riscos antes de gerar qualquer código.
 
+## Workflow agentico para projetos STANDARD/COMPLEX
+
+Antes do primeiro side effect relevante, leia `${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/agentic-workflow.md`.
+
+- No Claude Code, prefira os subagents nativos do plugin quando a tarefa justificar especializacao.
+- No Codex, execute os mesmos roles logicos via skill/tools disponiveis; native subagent nao e requisito.
+- Preserve `ROOT_ROUTED`: o modelo principal mantem Workflow State, transporta handoffs e materializa canonical outputs quando necessario.
+- Para UI relevante, siga Design-First: Research Evidence -> Design Direction -> Implementation.
+- Se um specialist nao puder escrever, exija `CANONICAL_OUTPUT` e materialize como `ROOT_PROXY`.
+- Nao marque Implementation/Design como PASS antes da verificacao fisica dos artifacts.
+- Build PASS exige comando real com exit code 0.
+- QA, Review e Security precisam de evidence propria; ausencia de execucao vira `NOT EXECUTED`.
+- Ao final, gere Delivery Report e Quality Gate proporcionais.
+
 ## Geração
 
 Aplique `${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/react-core.md` e a referência da plataforma (`${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/nextjs.md` ou `${CLAUDE_PLUGIN_ROOT}/skills/react-dev/references/react-native.md`). Use a estrutura de pastas correspondente ao `devLevel` do perfil — não adote arquitetura acima do nível registrado sem apontar explicitamente por que este projeto exige a exceção.

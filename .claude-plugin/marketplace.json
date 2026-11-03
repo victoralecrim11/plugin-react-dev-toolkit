@@ -1,7 +1,7 @@
 {
   "name": "react-dev-marketplace",
-  "description": "Marketplace do React Dev Hub: mentoria, arquitetura, code review e deploy para React, Next.js e Expo.",
-  "version": "1.5.5",
+  "description": "Marketplace do React Dev Hub: Design-First, arquitetura agentica, mentoria, code review e deploy para React, Next.js e Expo.",
+  "version": "1.6.0",
   "owner": {
     "name": "Victor Alecrim",
     "url": "https://github.com/victoralecrim11"
@@ -11,8 +11,8 @@
       "name": "plugin-react-dev-toolkit",
       "displayName": "React Dev Hub",
       "source": "./",
-      "description": "Tech Lead e mentor para projetos React, Next.js e React Native/Expo: discovery de MVP, scaffolding TypeScript, code review didatico, deploy assistido e Project Hub local.",
-      "version": "1.5.5",
+      "description": "Tech Lead e mentor para React, Next.js e React Native/Expo com Design-First, camada agentica opcional, evidence-based quality gates, deploy assistido e Project Hub local.",
+      "version": "1.6.0",
       "author": {
         "name": "Victor Alecrim",
         "url": "https://github.com/victoralecrim11"
@@ -29,11 +29,14 @@
         "typescript",
         "code-review",
         "deploy",
-        "mentoria"
+        "mentoria",
+        "design-first",
+        "agentic"
       ],
-      "tags": ["react", "nextjs", "expo", "typescript", "mentoria"],
+      "tags": ["react", "nextjs", "expo", "typescript", "mentoria", "agentic"],
       "skills": ["./skills/"],
       "commands": ["./commands/"],
+      "agents": ["./agents/"],
       "strict": true
     }
   ],

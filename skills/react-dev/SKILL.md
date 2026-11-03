@@ -1,6 +1,6 @@
 ---
 name: react-dev
-description: Base de conhecimento para projetos React, Next.js e React Native/Expo. Use quando o assunto envolver React, TypeScript, Hooks, Zustand, TanStack Query, App Router, Server Components, Server Actions, SSR, SSG, Expo, Expo Router, Hermes, Reanimated, discovery de MVP, scaffolding, code review, arquitetura de pastas, deploy, build de producao, publicar, hospedar, Vercel, Netlify, Cloudflare Pages, GitHub Pages, Expo EAS, GitHub Actions, CI/CD, variaveis de ambiente, analisar projeto feito com o framework GSD (pasta .planning/, PROJECT.md, ROADMAP.md, STATE.md, phases), auditoria de seguranca (segredos vazados, dependencias vulneraveis, XSS, injecao, autenticacao, exposicao de dados), ou o Project Hub local (projetos, componentes, reviews, metricas, divida tecnica, checklist).
+description: Base de conhecimento para projetos React, Next.js e React Native/Expo. Use quando o assunto envolver React, TypeScript, Hooks, Zustand, TanStack Query, App Router, Server Components, Server Actions, SSR, SSG, Expo, Expo Router, Hermes, Reanimated, discovery de MVP, scaffolding, Design-First, workflow agentico, canonical output, ROOT_PROXY, quality gate, QA funcional, code review, arquitetura de pastas, deploy, build de producao, publicar, hospedar, Vercel, Netlify, Cloudflare Pages, GitHub Pages, Expo EAS, GitHub Actions, CI/CD, variaveis de ambiente, analisar projeto feito com o framework GSD (pasta .planning/, PROJECT.md, ROADMAP.md, STATE.md, phases), auditoria de seguranca (segredos vazados, dependencias vulneraveis, XSS, injecao, autenticacao, exposicao de dados), ou o Project Hub local (projetos, componentes, reviews, metricas, divida tecnica, checklist).
 user-invocable: false
 ---
 
@@ -16,6 +16,8 @@ independente: leia só o que a tarefa exige, não todos.
 | Next.js: App Router, Server Components, Server Actions, SSR/SSG | `references/nextjs.md` |
 | React Native e Expo: Expo Router, Hermes, Reanimated, mobile | `references/react-native.md` |
 | Discovery, planejamento, MVP, implementação incremental, review | `references/project-builder.md` |
+| Workflow agentico portátil, ownership, Design-First e Quality Gate | `references/agentic-workflow.md` |
+| QA funcional, cenários e evidence | `references/qa-engineer.md` |
 | Segurança: auditoria de brechas, segredos, XSS, injeção, auth | `references/security-review.md` |
 | Deploy, CI/CD, provedores, build de produção, segredos | `references/deploy-advisor.md` |
 | GSD: analisar projeto feito com o framework (`.planning/`, spec vs código) | `references/gsd-analyzer.md` |
@@ -33,6 +35,8 @@ nunca por caminho relativo ao projeto do usuário.
   orientar carreira ou explicar arquitetura, leia `react-mentor.md`. Para
   transformar ideia em projeto, planejar ou implementar, leia
   `project-builder.md`.
+- **STANDARD/COMPLEX usa o contrato agentico.** Leia `references/agentic-workflow.md` antes de side effects relevantes. Em Claude Code, use os subagents de `agents/` quando forem apropriados; em Codex, execute os mesmos roles pela skill sem depender de native subagents.
+- **SPECIALIST SELF-REPORT != PHASE EVIDENCE.** Claims de arquivo, build, QA ou deploy exigem tool evidence ou verificacao fisica independente.
 - **TypeScript estrito é obrigatório** e não é configurável.
 - **O nível do desenvolvedor é o teto de complexidade.** Ele vive em `devLevel`
   no `dashboard-config.json` e é definido pelo `/setup`. Nenhum comando pergunta

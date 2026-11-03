@@ -156,8 +156,34 @@ if not ag_entry.get("category"):
 
 for key in ("skills", "commands", "agents"):
     for p in entry.get(key, []) or []:
+        if key == "agents":
+            if not isinstance(p, str) or not p.endswith(".md"):
+                E(f"plugins[0].agents: cada entrada deve apontar para um arquivo .md, recebido {p!r}")
+                continue
+            if Path(p).is_dir():
+                E(f"plugins[0].agents: diretorio nao e valido; liste cada agent .md explicitamente: {p}")
+                continue
         if not Path(p).exists():
             E(f"plugins[0].{key}: caminho inexistente {p}")
+
+declared_agents = {
+    Path(p).as_posix().removeprefix("./")
+    for p in (entry.get("agents") or [])
+    if isinstance(p, str) and p.endswith(".md")
+}
+actual_agents = {
+    Path(p).as_posix()
+    for p in glob.glob("agents/*.md")
+}
+if declared_agents == actual_agents:
+    O(f"marketplace declara exatamente os {len(actual_agents)} agents .md")
+else:
+    missing = sorted(actual_agents - declared_agents)
+    extra = sorted(declared_agents - actual_agents)
+    if missing:
+        E(f"marketplace nao declara agents existentes: {missing}")
+    if extra:
+        E(f"marketplace declara agents inexistentes: {extra}")
 
 # renames deve terminar em null ou em plugin listado
 listed = {p.get("name") for p in mp.get("plugins", [])}

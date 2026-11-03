@@ -33,10 +33,27 @@
         "design-first",
         "agentic"
       ],
-      "tags": ["react", "nextjs", "expo", "typescript", "mentoria", "agentic"],
-      "skills": ["./skills/"],
-      "commands": ["./commands/"],
-      "agents": ["./agents/"],
+      "tags": [
+        "react",
+        "nextjs",
+        "expo",
+        "typescript",
+        "mentoria",
+        "agentic"
+      ],
+      "skills": [
+        "./skills/"
+      ],
+      "commands": [
+        "./commands/"
+      ],
+      "agents": [
+        "./agents/project-orchestrator.md",
+        "./agents/design-researcher.md",
+        "./agents/design-director.md",
+        "./agents/implementation-engineer.md",
+        "./agents/quality-auditor.md"
+      ],
       "strict": true
     }
   ],

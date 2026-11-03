@@ -1,10 +1,8 @@
 name: Bump da versao do plugin
 
-# A cada push na main, sincroniza a versao nos cinco lugares dos manifestos do Claude
-# Code e do Codex e cria a tag. Isso e o que faz um commit chegar aos usuarios: as duas
-# plataformas comparam o campo "version" para decidir se ha atualizacao.
-#
-# Nao reage ao commit que o proprio bot cria, para nao entrar em loop de push.
+# Push com versao explicitamente alterada preserva a versao humana.
+# Push sem alteracao de versao continua recebendo auto-patch.
+# Tags de release sao imutaveis: nunca use force tag/push.
 
 on:
   push:
@@ -13,16 +11,17 @@ on:
       - ".agents/**"
       - ".claude-plugin/**"
       - ".codex-plugin/**"
+      - "agents/**"
       - "commands/**"
       - "skills/**"
       - ".mcp.json"
   workflow_dispatch:
     inputs:
       part:
-        description: "Parte da versao a incrementar"
+        description: "Versao atual ou parte a incrementar"
         type: choice
         default: patch
-        options: [patch, minor, major]
+        options: [current, patch, minor, major]
 
 permissions:
   contents: write
@@ -40,12 +39,72 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Sincronizar a versao nos manifestos
-        id: bump
+      - name: Selecionar a versao da release
+        id: version
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          PART: ${{ inputs.part || 'patch' }}
         run: |
-          python3 scripts/bump-version.py --${{ inputs.part || 'patch' }} | tee bump.log
-          echo "version=$(grep -oP '::set-version::\K.*' bump.log)" >> "$GITHUB_OUTPUT"
-          rm bump.log
+          CURRENT_VERSION=$(python3 -c 'import json; print(json.load(open(".claude-plugin/plugin.json", encoding="utf-8"))["version"])')
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && "$PART" == "current" ]]; then
+            VERSION="$CURRENT_VERSION"
+            echo "explicit_version_change=YES" >> "$GITHUB_OUTPUT"
+            echo "auto_bump=NO" >> "$GITHUB_OUTPUT"
+          elif [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            python3 scripts/bump-version.py --"$PART" | tee bump.log
+            VERSION=$(python3 -c 'import re; print(re.search(r"::set-version::([^\\s]+)", open("bump.log", encoding="utf-8").read()).group(1))')
+            rm bump.log
+            echo "explicit_version_change=NO" >> "$GITHUB_OUTPUT"
+            echo "auto_bump=YES" >> "$GITHUB_OUTPUT"
+          else
+            PREVIOUS_VERSION=$(BEFORE_SHA="$BEFORE_SHA" python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+
+          before = os.environ.get("BEFORE_SHA", "")
+          if not before or set(before) == {"0"}:
+              print("")
+          else:
+              try:
+                  raw = subprocess.check_output(
+                      ["git", "show", f"{before}:.claude-plugin/plugin.json"],
+                      text=True,
+                      stderr=subprocess.DEVNULL,
+                  )
+                  print(json.loads(raw)["version"])
+              except (subprocess.CalledProcessError, KeyError, json.JSONDecodeError):
+                  print("")
+          PY
+            )
+
+            if [[ -z "$PREVIOUS_VERSION" || "$PREVIOUS_VERSION" != "$CURRENT_VERSION" ]]; then
+              VERSION="$CURRENT_VERSION"
+              echo "explicit_version_change=YES" >> "$GITHUB_OUTPUT"
+              echo "auto_bump=NO" >> "$GITHUB_OUTPUT"
+            else
+              python3 scripts/bump-version.py --patch | tee bump.log
+              VERSION=$(python3 -c 'import re; print(re.search(r"::set-version::([^\\s]+)", open("bump.log", encoding="utf-8").read()).group(1))')
+              rm bump.log
+              echo "explicit_version_change=NO" >> "$GITHUB_OUTPUT"
+              echo "auto_bump=YES" >> "$GITHUB_OUTPUT"
+            fi
+
+            echo "previous_version=${PREVIOUS_VERSION:-NOT_FOUND}" >> "$GITHUB_OUTPUT"
+          fi
+
+          VERSION="$VERSION" python3 - <<'PY'
+          import os
+          import re
+          version = os.environ["VERSION"]
+          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+              raise SystemExit(f"versao invalida: {version!r}")
+          PY
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Checagens proprias do pacote
         run: python3 scripts/validate-plugin.py
@@ -56,35 +115,56 @@ jobs:
       - name: Validacao oficial do manifesto
         run: claude plugin validate . --strict
 
-      # --force ignora apenas a checagem de arvore suja (o bump acabou de mexer
-      # nos arquivos e o commit vem no passo seguinte). A checagem de versao
-      # entre plugin.json e a entrada do marketplace continua valendo.
       - name: Conferir que plugin.json e a entrada do marketplace concordam
         run: claude plugin tag . --dry-run --force
 
-      - name: Commitar e taguear
+      - name: Commitar bump automatico, se necessario
+        if: steps.version.outputs.auto_bump == 'YES'
         env:
-          V: ${{ steps.bump.outputs.version }}
+          V: ${{ steps.version.outputs.version }}
         run: |
           if git diff --quiet; then
             echo "versao nao mudou, nada a commitar" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .claude-plugin/ .codex-plugin/ .agents/ README.md manual.html
           git commit -m "chore(release): v$V
 
           Bump automatico da versao nos manifestos do Claude Code e do Codex.
           As duas plataformas usam o campo version para detectar atualizacao."
-          git tag -f "v$V"
           git push
-          git push -f origin "v$V"
+
+      - name: Criar tag imutavel
+        env:
+          V: ${{ steps.version.outputs.version }}
+        run: |
+          TAG="v$V"
+          RELEASE_SHA=$(git rev-parse HEAD)
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch --tags origin
+
+          if git show-ref --verify --quiet "refs/tags/$TAG"; then
+            TAG_SHA=$(git rev-list -n 1 "$TAG")
+            if [[ "$TAG_SHA" != "$RELEASE_SHA" ]]; then
+              echo "erro: $TAG ja existe em $TAG_SHA, esperado $RELEASE_SHA" >&2
+              exit 1
+            fi
+            echo "$TAG ja existe no commit da release; nada a fazer" >> "$GITHUB_STEP_SUMMARY"
+          else
+            git tag -a "$TAG" -m "Release $V"
+            git push origin "$TAG"
+          fi
+
           {
             echo "### Publicado v$V"
             echo ""
-            echo '```'
+            echo '~~~'
             echo "/plugin marketplace update react-dev-marketplace"
             echo "codex plugin marketplace upgrade"
-            echo '```'
+            echo '~~~'
           } >> "$GITHUB_STEP_SUMMARY"

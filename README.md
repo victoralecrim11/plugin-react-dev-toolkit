@@ -1,4 +1,4 @@
-# React Dev Hub Plugin — v1.5.5
+# React Dev Hub Plugin — v1.6.0
 > Compatível com **Claude Code / Claude Desktop** (`.claude-plugin/`) e com o **Codex** (`.codex-plugin/`), a partir de um único repositório.
 
 Plugin de desenvolvimento orientado a aprendizado para planejar, construir, revisar, publicar e acompanhar projetos **React, Next.js e React Native/Expo**. Combina padrões modernos de TypeScript com decisões arquiteturais proporcionais ao nível do desenvolvedor e ao tamanho do produto. Inclui o comando `/gerar-midia` para criar imagens hero, previews sociais e vídeos curtos via MCP da Higgsfield, o `/analisar-projeto-gsd`, que analisa projetos construídos com o **framework GSD** cruzando os artefatos da pasta `.planning/` com o código real, e o `/auditar-seguranca`, uma auditoria de segurança que caça as brechas típicas de "vibe coding" antes que virem problema.
@@ -13,7 +13,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
 
 ## Índice
 
-- [React Dev Hub Plugin — v1.5.5](#react-dev-hub-plugin--v155)
+- [React Dev Hub Plugin — v1.6.0](#react-dev-hub-plugin--v160)
   - [Índice](#índice)
   - [Instalação](#instalação)
     - [Claude Code (CLI)](#claude-code-cli)
@@ -24,6 +24,7 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
     - [Atualizar depois de um push](#atualizar-depois-de-um-push)
       - [Na sua máquina](#na-sua-máquina)
       - [Deixar o Claude Code atualizar sozinho](#deixar-o-claude-code-atualizar-sozinho)
+  - [Arquitetura agentic portatil](#arquitetura-agentic-portatil)
   - [O ciclo de desenvolvimento](#o-ciclo-de-desenvolvimento)
     - [O fluxo do `/deploy`](#o-fluxo-do-deploy)
   - [A skill que age sozinha](#a-skill-que-age-sozinha)
@@ -40,7 +41,8 @@ Depois: `/plugin-react-dev-toolkit:setup`. As outras formas de instalar estão e
   - [Estrutura do pacote](#estrutura-do-pacote)
   - [Princípios de mentoria](#princípios-de-mentoria)
   - [Manual](#manual)
-- [O que mudou na v1.5.5](#o-que-mudou-na-v1.5.5)
+- [O que mudou na v1.6.0](#o-que-mudou-na-v160)
+  - [O que mudou na v1.5.5](#o-que-mudou-na-v155)
   - [O que mudou na v1.5.4](#o-que-mudou-na-v154)
   - [O que mudou na v1.5.3](#o-que-mudou-na-v153)
   - [O que mudou na v1.5.2](#o-que-mudou-na-v152)
@@ -211,6 +213,21 @@ O Claude Code atualiza marketplaces e plugins em background depois que a sessão
 A checagem roda com atraso aleatório de até dez minutos após o início da sessão, e a sessão em andamento continua usando o que carregou no launch: quando houver atualização, aparece um aviso para rodar `/reload-plugins`.
 
 No **Codex não existe auto-update documentado** para plugins de marketplace. O caminho é o `codex plugin marketplace upgrade` do script. Para a instalação via GitHub, o marketplace usa `source: "url"` e a atualização vem do `upgrade`; para desenvolvimento local, o exemplo em `examples/codex-marketplace-local.json` aponta para a pasta do clone local.
+
+## Arquitetura agentic portatil
+
+A v1.6.0 porta para Claude Code e Codex os contratos validados na linha Antigravity sem presumir que os dois runtimes expoem a mesma superficie de subagents.
+
+- **Claude Code:** os cinco especialistas em `agents/` funcionam como subagents do plugin.
+- **Codex:** o comportamento canonico vive em `skills/react-dev/references/agentic-workflow.md`; os mesmos roles logicos sao executados via skill e tools disponiveis, sem depender de native subagents.
+- **ROOT_ROUTED:** o modelo principal continua sendo Runtime Delegator, Workflow State Host e Handoff Transport.
+- **Design-First:** para produtos com UI relevante, o fluxo preferencial e Research Evidence -> Design Direction -> Implementation.
+- **SIDE-EFFECT TRUTH:** `SPECIALIST SELF-REPORT != PHASE EVIDENCE`; claims de arquivo, build, QA ou deploy exigem tool evidence ou verificacao fisica.
+- **`SPECIALIST_DIRECT` / `CANONICAL_OUTPUT`:** specialists podem executar diretamente ou entregar canonical packages para materializacao via `ROOT_PROXY`.
+- **Quality Gate:** Build, QA, Review e Security permanecem fases independentes; o `quality-auditor` apenas consolida o Delivery Report.
+- **Qualidade vs compliance:** `Product Quality Status` e `Toolkit Compliance Status` sao julgados separadamente.
+
+Nested delegation nunca e requisito. Quando um runtime nao oferece um mecanismo de subagent equivalente, o owner logico e preservado e o executor real e registrado.
 
 ## O ciclo de desenvolvimento
 
@@ -392,6 +409,16 @@ Abra `manual.html` no navegador para uma visão rápida dos sete comandos e do f
 <a id="o-que-mudou-na-v1.5.2"></a>
 <a id="o-que-mudou-na-v1.5.3"></a>
 <a id="o-que-mudou-na-v1.5.4"></a>
+<a id="o-que-mudou-na-v160"></a>
+## O que mudou na v1.6.0
+
+- **Camada agentica portatil.** Claude Code recebe cinco subagents nativos; Codex usa os mesmos contratos pela skill `react-dev`.
+- **Design-First e ownership.** Planner, Research Evidence, Design Direction, Implementation e Quality Gate passam a ter owners e evidence explicitos.
+- **SIDE-EFFECT TRUTH.** `SPECIALIST SELF-REPORT != PHASE EVIDENCE`; claims operacionais precisam de tool evidence ou verificacao fisica.
+- **`SPECIALIST_DIRECT` / `CANONICAL_OUTPUT`.** Specialists podem executar diretamente ou entregar canonical packages para `ROOT_PROXY`.
+- **Quality Gate baseado em evidencias.** Build, QA, Review e Security nao se substituem; Product Quality e Toolkit Compliance sao independentes.
+- **Release engineering segura.** Push com versao explicita nao sofre double bump; tags sao anotadas e imutaveis, sem `git tag -f` ou force push.
+
 <a id="o-que-mudou-na-v1.5.5"></a>
 ## O que mudou na v1.5.5
 

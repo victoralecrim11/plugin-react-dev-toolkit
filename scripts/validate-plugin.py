@@ -267,6 +267,98 @@ for sd in skill_dirs:
             "deixa a skill inalcancavel para o usuario E para o modelo"
         )
 
+# ---------- camada agentica portatil ----------
+required_agents = {
+    "project-orchestrator",
+    "design-researcher",
+    "design-director",
+    "implementation-engineer",
+    "quality-auditor",
+}
+agent_files = sorted(glob.glob("agents/*.md"))
+found_agents = set()
+
+for f in agent_files:
+    data, err = frontmatter(f)
+    if err:
+        E(f"{f}: {err}")
+        continue
+    name = data.get("name")
+    if not name:
+        E(f"{f}: frontmatter sem name")
+        continue
+    if not data.get("description"):
+        E(f"{f}: frontmatter sem description")
+    if Path(f).stem != name:
+        E(f"{f}: filename e name divergentes ({Path(f).stem} != {name})")
+    found_agents.add(name)
+
+missing_agents = sorted(required_agents - found_agents)
+if missing_agents:
+    E(f"agents obrigatorios ausentes: {missing_agents}")
+else:
+    O(f"camada agentica Claude presente: {len(required_agents)} agents")
+
+agentic_ref = Path("skills/react-dev/references/agentic-workflow.md")
+qa_ref = Path("skills/react-dev/references/qa-engineer.md")
+
+if not agentic_ref.exists():
+    E("referencia agentic-workflow.md ausente")
+else:
+    txt = agentic_ref.read_text(encoding="utf-8")
+    missing_contracts = [
+        token for token in (
+            "SPECIALIST SELF-REPORT != PHASE EVIDENCE",
+            "CANONICAL_OUTPUT",
+            "ROOT_PROXY",
+            "Product Quality Status",
+            "Toolkit Compliance Status",
+            "Planner Compliance",
+        )
+        if token not in txt
+    ]
+    if missing_contracts:
+        E(f"agentic-workflow.md sem contratos obrigatorios: {missing_contracts}")
+    else:
+        O("contratos agenticos portateis presentes")
+
+if not qa_ref.exists():
+    E("referencia qa-engineer.md ausente")
+else:
+    O("referencia QA funcional presente")
+
+impl = Path("agents/implementation-engineer.md")
+if impl.exists():
+    txt = impl.read_text(encoding="utf-8")
+    missing = [
+        token for token in (
+            "SPECIALIST_DIRECT",
+            "CANONICAL_OUTPUT",
+            "Materialization Status: REQUIRED",
+        )
+        if token not in txt
+    ]
+    if missing:
+        E(f"implementation-engineer sem contratos: {missing}")
+    else:
+        O("implementation-engineer possui direct/canonical contract")
+
+director = Path("agents/design-director.md")
+if director.exists():
+    txt = director.read_text(encoding="utf-8")
+    missing = [
+        token for token in (
+            "SIDE-EFFECT TRUTH CONTRACT",
+            "DESIGN CANONICAL PACKAGE",
+            "Materialization Status: REQUIRED",
+        )
+        if token not in txt
+    ]
+    if missing:
+        E(f"design-director sem contratos: {missing}")
+    else:
+        O("design-director possui side-effect truth contract")
+
 # ---------- higiene ----------
 junk = 0
 for f in glob.glob("**/*.md", recursive=True):
